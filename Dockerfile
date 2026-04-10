@@ -2,7 +2,7 @@
 FROM rust:bookworm
 
 # Install system dependencies required by SP1 and cryptographic crates
-RUN apt-get update && apt-get install -y clang cmake build-essential curl pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y clang cmake build-essential curl pkg-config libssl-dev protobuf-compiler && rm -rf /var/lib/apt/lists/*
 
 # Install SP1 toolchain and CLI
 RUN curl -L https://sp1.succinct.xyz | bash
