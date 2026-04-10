@@ -30,7 +30,7 @@ if ([string]::IsNullOrWhiteSpace($IMAGE)) {
 }
 
 "Booting SP1 Coprocessor to compute STARK matrix natively..." | Out-File -FilePath $LOGFILE -Append
-docker run --rm -v "${PWD}:/app/output" -v "${PWD}/1-client/intent.json:/app/1-client/intent.json" zkvm-coprocessor 2>&1 | Tee-Object -FilePath $LOGFILE -Append
+docker run --env "SP1_PROVER=mock" --rm -v "${PWD}:/app/output" -v "${PWD}/1-client/intent.json:/app/1-client/intent.json" zkvm-coprocessor 2>&1 | Tee-Object -FilePath $LOGFILE -Append
 $sp1Status = $LASTEXITCODE
 if ($sp1Status -ne 0) {
     "`n❌ [FATAL ERROR] SP1 ZK-Coprocessor execution crashed. Check logs." | Out-File -FilePath $LOGFILE -Append

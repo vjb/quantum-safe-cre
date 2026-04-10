@@ -9,10 +9,10 @@ This script fully automates your remote SP1 architecture, preventing local OOM c
 
 $ErrorActionPreference = "Stop"
 
-$PROJECT_ID = "axial-totality-335815" # Your currently authenticated GCP project
-$ZONE = "us-central1-a"
+$PROJECT_ID = "centering-helix-493023-f7" # Your currently authenticated GCP project
+$ZONE = "us-central1-c"
 $INSTANCE_NAME = "zkvm-prover-spot-instance"
-$MACHINE_TYPE = "n2-standard-64" # 64 Cores / 256GB RAM to securely crush Plonk generation natively
+$MACHINE_TYPE = "n2-highmem-32" # 32 Cores / 256GB RAM. Retains identical memory footprint while cutting CPU utilization in half to bypass DataCenter Stockouts.
 
 Write-Host "🚀 [1/5] Initiating Google Cloud Ephemeral Orchestration..." -ForegroundColor Cyan
 Write-Host "Project: $PROJECT_ID | Zone: $ZONE" -ForegroundColor DarkGray
@@ -27,11 +27,16 @@ gcloud compute instances create $INSTANCE_NAME `
     --project=$PROJECT_ID `
     --zone=$ZONE `
     --machine-type=$MACHINE_TYPE `
-    --provisioning-model=SPOT `
+    --preemptible `
     --image-family=ubuntu-2204-lts `
     --image-project=ubuntu-os-cloud `
     --boot-disk-size=100GB `
     --quiet
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n❌ [FATAL ERROR] GCP DataCenter threw a Stockout limit. Terminal Execution aborted cleanly." -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "`n⏳ Waiting 45 seconds for Ubuntu SSH Daemon to boot successfully..." -ForegroundColor DarkGray
 Start-Sleep -Seconds 45
@@ -42,7 +47,7 @@ $REMOTE_COMMAND = "git clone https://github.com/vjb/quantum-safe-cre.git && cd q
 gcloud compute ssh $INSTANCE_NAME `
     --project=$PROJECT_ID `
     --zone=$ZONE `
-    --ssh-flag="-o StrictHostKeyChecking=no" `
+    --strict-host-key-checking=no `
     --command=$REMOTE_COMMAND `
     --quiet
 
@@ -51,7 +56,7 @@ Write-Host "`n📥 [4/5] Extracting proof.json Plonk matrix to your local worksp
 gcloud compute scp "$($INSTANCE_NAME):~/quantum-safe-cre/proof.json" "./proof.json" `
     --project=$PROJECT_ID `
     --zone=$ZONE `
-    --ssh-flag="-o StrictHostKeyChecking=no" `
+    --strict-host-key-checking=no `
     --quiet
 
 # 5. Terminate Host

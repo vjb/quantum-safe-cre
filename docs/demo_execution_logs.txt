@@ -3,75 +3,35 @@
 ==========================================================
 [PHASE 1] Local Client: Post-Quantum Intent Generation
 ==========================================================
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
      Running `target\debug\client.exe`
-[2m2026-04-10T03:25:37.979133Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Starting 1-client Intent Generator...
-[2m2026-04-10T03:25:37.979185Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Generating Dilithium keypair...
-[2m2026-04-10T03:25:37.981738Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Signing intent payload...
-[2m2026-04-10T03:25:37.988533Z[0m [34mDEBUG[0m [2mclient[0m[2m:[0m Payload constructed with Message: 'Transfer 10 USDC', Key Length: 3904, Sig Length: 6586
-[2m2026-04-10T03:25:37.989794Z[0m [32m INFO[0m [2mclient::storage[0m[2m:[0m Successfully exported intent to intent.json. Size: 10572 bytes
-[2m2026-04-10T03:25:37.989838Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Success! intent.json has been written to disk.
+[2m2026-04-10T19:53:33.617574Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Starting 1-client Intent Generator...
+[2m2026-04-10T19:53:33.617663Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Generating Dilithium keypair...
+[2m2026-04-10T19:53:33.622490Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Signing intent payload...
+[2m2026-04-10T19:53:33.640465Z[0m [34mDEBUG[0m [2mclient[0m[2m:[0m Payload constructed with Message: 'Transfer 10 USDC', Key Length: 3904, Sig Length: 6586
+[2m2026-04-10T19:53:33.642547Z[0m [32m INFO[0m [2mclient::storage[0m[2m:[0m Successfully exported intent to intent.json. Size: 10572 bytes
+[2m2026-04-10T19:53:33.642601Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Success! intent.json has been written to disk.
 
 ==========================================================
 [PHASE 2] Docker execution bounding
 ==========================================================
 zkvm-coprocessor image already found. Bypassing redundant build logic.
+Booting SP1 Coprocessor to compute STARK matrix natively...
+[2m2026-04-10T19:53:34.564672Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Starting SP1 Host Orchestrator...
+[2m2026-04-10T19:53:34.578216Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Preparing SP1 Prover Client...
+[2m2026-04-10T19:53:34.578316Z[0m [32m INFO[0m [2msp1_sdk::mock[0m[2m:[0m initializing mock prover
+[2m2026-04-10T19:53:36.149653Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Generating STARK proof (this may take significant RAM/CPU bounds)...
+[2m2026-04-10T19:53:45.633349Z[0m [32m INFO[0m [2msp1_sdk::mock[0m[2m:[0m generating mock proof [3mmode[0m[2m=[0mPlonk
+[2m2026-04-10T19:53:45.659128Z[0m [32m INFO[0m [2msp1_prover::worker::prover::execute[0m[2m:[0m public_value_stream: [16, 0, 0, 0, 0, 0, 0, 0, 84, 114, 97, 110, 115, 102, 101, 114, 32, 49, 48, 32, 85, 83, 68, 67]
+[2m2026-04-10T19:53:45.837921Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Execution and STARK proving completed in 9.688213315s
+[2m2026-04-10T19:53:45.837973Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Successfully verified and committed message: Transfer 10 USDC
+[2m2026-04-10T19:53:45.842757Z[0m [32m INFO[0m [2mscript[0m[2m:[0m STARK cryptographic envelope materialized successfully into proof.json
 
 ==========================================================
 [PHASE 3 & 4] Chainlink DON Orchestration and Live Settlement
 ==========================================================
 Booting official Chainlink CRE environment in Linux Sandbox...
-#0 building with "default" instance using docker driver
-
-#1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 1.43kB done
-#1 DONE 0.0s
-
-#2 [internal] load metadata for docker.io/library/ubuntu:24.04
-#2 DONE 0.2s
-
-#3 [internal] load .dockerignore
-#3 transferring context: 69B done
-#3 DONE 0.0s
-
-#4 [1/8] FROM docker.io/library/ubuntu:24.04@sha256:84e77dee7d1bc93fb029a45e3c6cb9d8aa4831ccfcc7103d36e876938d28895b
-#4 DONE 0.0s
-
-#5 [internal] load build context
-#5 transferring context: 2.88kB done
-#5 DONE 0.0s
-
-#6 [5/8] RUN curl -sSL https://cre.chain.link/install.sh | bash && mv /root/.cre/bin/cre /usr/local/bin/cre
-#6 CACHED
-
-#7 [6/8] RUN mkdir -p /root/.cache/javy/v5.0.4/linux-x64     && curl -L https://github.com/bytecodealliance/javy/releases/download/v5.0.4/javy-x86_64-linux-v5.0.4.gz | gunzip > /root/.cache/javy/v5.0.4/linux-x64/javy     && chmod +x /root/.cache/javy/v5.0.4/linux-x64/javy
-#7 CACHED
-
-#8 [3/8] RUN mkdir -p /etc/apt/keyrings     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list     && apt-get update && apt-get install -y nodejs
-#8 CACHED
-
-#9 [2/8] RUN apt-get update && apt-get install -y curl git build-essential unzip wget ca-certificates gnupg xz-utils && rm -rf /var/lib/apt/lists/*
-#9 CACHED
-
-#10 [4/8] RUN curl -fsSL https://bun.sh/install | bash
-#10 CACHED
-
-#11 [7/8] WORKDIR /app
-#11 CACHED
-
-#12 [8/8] COPY . .
-#12 DONE 0.1s
-
-#13 exporting to image
-#13 exporting layers 0.1s done
-#13 writing image sha256:7c852aa79d500f9d7e5094114ba8befed147ba010dbd7cf05c6c2090f2d97036 done
-#13 naming to docker.io/library/cre-node-env done
-#13 DONE 0.1s
-
-View build details: docker-desktop://dashboard/build/default/default/j73x6kym9ncb1x8eeba9oban0
-
-What's Next?
-  View a summary of image vulnerabilities and recommendations → docker scout quickview
+cre-node-env image already found. Bypassing redundant build logic.
 Initializing...
 Loading settings...
 Checking RPC connectivity...
@@ -79,19 +39,19 @@ Compiling workflow...
 ✓ Workflow compiled
 ✓ Simulation limits enabled
   HTTP: req=10kb resp=100kb timeout=10s | ConfHTTP: req=10kb resp=100kb timeout=10s | Consensus obs=100kb | ChainWrite report=5kb gas=5000000 | WASM binary=100mb compressed=20mb
-  Binary hash: 0608a18aaaf4624d98365d0b20a0679e3a35dd4b90f7352f2890a8fd2d410daf
+  Binary hash: 910fef7490a51150caa8e70fa0178d1e1077e84c07fd5c868a78e74fc586c44f
   Config hash: bb68dc1abc9cb717a20ad331a4bcf1d25396d81d48ff6c17f442162be64712ab
-2026-04-10T03:25:48Z [SIMULATION] Simulator Initialized
+2026-04-10T19:54:01Z [SIMULATION] Simulator Initialized
 
-2026-04-10T03:25:48Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] Booting WASM Enclave Validation...
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] Intercepting Off-Chain SP1 Coprocessor Payload...
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] ✓ Mathematical STARK Proof Ingested (5 bytes)
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] ✓ Public Journal Extracted: "Transfer 10 USDC"
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] Decrypting intent constraints...
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] ✓ Intent matches User Signature.
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] 🟢 BFT CONSENSUS ACHIEVED. Cryptographic math verified.
-2026-04-10T03:25:49Z [USER LOG] [CHAINLINK DON] Routing STARK to Base Sepolia Settlement Vault...
+2026-04-10T19:54:01Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Booting WASM Enclave Validation...
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Intercepting Off-Chain SP1 Coprocessor Payload...
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Mathematical STARK Proof Ingested (5 bytes)
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Public Journal Extracted: "Transfer 10 USDC"
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Decrypting intent constraints...
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Intent matches User Signature.
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] 🟢 BFT CONSENSUS ACHIEVED. Cryptographic math verified.
+2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Routing STARK to Base Sepolia Settlement Vault...
 
 ✓ Workflow Simulation Result:
 {
@@ -99,8 +59,8 @@ Compiling workflow...
   "verdict": "VALID"
 }
 
-2026-04-10T03:25:49Z [SIMULATION] Execution finished signal received
-2026-04-10T03:25:49Z [SIMULATION] Skipping WorkflowEngineV2
+2026-04-10T19:54:01Z [SIMULATION] Execution finished signal received
+2026-04-10T19:54:01Z [SIMULATION] Skipping WorkflowEngineV2
 
 ╭──────────────────────────────────────────────────────╮
 │ Simulation complete! Ready to deploy your workflow?  │
