@@ -52,6 +52,8 @@ graph TD
     style Phase3_End fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
 ```
 
+*Figure 1: The Quantum-Safe CRE Pipeline. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from the EVM constraint. The Chainlink Decentralized Oracle Network dynamically orchestrates an isolated SP1 zkVM, mathematically proving the signature off-chain and compressing the computation into a cheap, gas-efficient STARK proof.*
+
 ### Microservices
 1. **`1-client`**: A Rust client that generates a user intent and secures it with an ML-DSA lattice signature.
 2. **`2-sp1-coprocessor`**: A Dockerized RISC-V Zero-Knowledge VM that ingests the intent, runs the lattice verification, and outputs a cryptographic STARK proof.
