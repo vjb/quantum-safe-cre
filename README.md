@@ -18,32 +18,38 @@ The EVM verifies the STARK proof for flat, cheap gas, entirely ignorant of the m
 
 ```mermaid
 graph TD
-    subgraph "1. Post-Quantum Client (Local)"
-        A[User Intent: 'Transfer 10 USDC'] -->|Dilithium ML-DSA Sign| B(intent.json)
-        B -.->|Massive 2.4KB Signature| C
+    classDef client fill:#E0F7FA,stroke:#00BCD4,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+    classDef zk fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+    classDef link fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+    classDef base fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+
+    subgraph Phase1 ["1. Post-Quantum Client"]
+        A["User Intent: 'Transfer 10 USDC'"]:::client -->|"Sign"| B("intent.json"):::client
     end
 
-    subgraph "2. ZK-Coprocessor (SP1 RISC-V Docker)"
-        C[Host Orchestrator] -->|Pass Inputs| D{SP1 zkVM}
-        D -->|pqc_dilithium::verify| E[Valid Math]
-        E -->|Compress & Prove| F[STARK Proof + Public Journal]
+    subgraph Phase3_Start ["3. Chainlink DON (Trigger)"]
+        G["Webhook"]:::link -->|"cre simulate"| H["oracle.ts"]:::link
     end
 
-    subgraph "3. Chainlink CRE (Decentralized Orchestrator)"
-        G[Webhook Trigger] -->|cre simulate| H[oracle.ts]
-        H -->|Execute Docker Prover| C
-        F -.->|Return Proof| H
-        H -->|Validate Journal === Intent| I((DON Consensus Achieved))
+    subgraph Phase2 ["2. ZK-Coprocessor (Docker)"]
+        C["Host Orchestrator"]:::zk -->|"Load Inputs"| D{"SP1 zkVM"}:::zk
+        D -->|"pqc_dilithium::verify"| E["Process Lattice Math"]:::zk
+        E -->|"Generate STARK"| F["STARK Proof"]:::zk
     end
 
-    I -->|Cheap EVM Verification| J[(Base Sepolia L2 Vault)]
+    subgraph Phase3_End ["3. Chainlink DON (Consensus)"]
+        H2["Validate Journal"]:::link -->|"Enforce Rules"| I(("DON Consensus Achieved")):::link
+    end
 
-    classDef client fill:#1e1e1e,stroke:#00ffcc,stroke-width:2px;
-    classDef zk fill:#1e1e1e,stroke:#ff00ff,stroke-width:2px;
-    classDef link fill:#1e1e1e,stroke:#375bd2,stroke-width:2px;
-    class A,B client;
-    class C,D,E,F zk;
-    class G,H,I link;
+    B -.->|"2.4KB Signature"| C
+    H -->|"Execute SP1 Prover"| C
+    F -.->|"Return Compressed Proof"| H2
+    I -->|"Submit On-Chain"| J[("Base Sepolia L2 Vault")]:::base
+
+    style Phase1 fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
+    style Phase3_Start fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
+    style Phase2 fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
+    style Phase3_End fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
 ```
 
 ### Microservices
