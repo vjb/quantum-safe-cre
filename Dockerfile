@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y clang cmake build-essential curl pkg-co
 # Install SP1 toolchain and CLI
 RUN curl -L https://sp1.succinct.xyz | bash
 ENV PATH="/root/.sp1/bin:${PATH}"
-RUN sp1up
+RUN sp1up -v v3.4.0
 
 # Set up project workspace
 WORKDIR /app
