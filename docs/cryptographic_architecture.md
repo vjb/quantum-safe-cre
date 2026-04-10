@@ -1,58 +1,71 @@
 # Quantum-Safe CRE: Cryptographic Architecture & Mathematical Threat Models
 
-This document serves as the institutional primer for the hybrid cryptographic architecture governing the `quantum-safe-cre` network. It details the transition from Post-Quantum structural commitments (ML-DSA) into Succinct Zero-Knowledge polynomial proofs (FRI-STARKs) for EVM settlement.
-
----
+This document serves as the institutional primer for the hybrid cryptographic architecture governing the quantum-safe-cre network. It details the pipeline of translating Post-Quantum structural commitments (ML-DSA) into Succinct Zero-Knowledge polynomial proofs (FRI-STARKs) for cheap EVM settlement.
 
 ## 1. Local Intent Generation: ML-DSA (Lattice Cryptography)
-To achieve post-quantum security against Shor's Algorithm threats, this architecture utilizes **ML-DSA (formerly CRYSTALS-Dilithium)**, recognized by NIST for standardization.
+To achieve post-quantum security against Shor's Algorithm, this architecture utilizes ML-DSA (formerly CRYSTALS-Dilithium), the NIST-standardized algorithm for digital signatures.
 
-Unlike conventional Elliptic Curve (ECDSA) models which rely on the hardness of the discrete logarithm problem, ML-DSA relies on the hardness of the **Module Learning with Errors (MLWE)** and **Module Short Integer Solution (MSIS)** problems over polynomial rings.
+Unlike Elliptic Curve Digital Signature Algorithm (ECDSA), which relies on the discrete logarithm problem, ML-DSA relies on the hardness of the Module Learning with Errors (MLWE) and Module Short Integer Solution (MSIS) problems.
 
 ### 1.1 The Polynomial Ring
-The cryptographic operations take place over the polynomial ring $R_q$:
-$$ R_q = \mathbb{Z}_q[X]/(X^n + 1) $$
-Where $n = 256$ and $q = 8380417$ (a prime chosen to explicitly support the Number Theoretic Transform (NTT) for ultra-fast polynomial multiplication).
+Cryptographic operations occur over the polynomial ring $R_q$:
 
-### 1.2 Signature Generation & Fiat-Shamir
-When the user generates a transaction intent (e.g., "Transfer 10 USDC"), the Rust client generates a signature utilizing the **Fiat-Shamir with Aborts** framework. 
-The signer generates a masking vector $\mathbf{y} \leftarrow S_{\gamma_1-1}^{l}$ and computes the high-order bits of $\mathbf{A} \cdot \mathbf{y}$.
+$$
+R_q = \mathbb{Z}_q[X]/(X^n + 1)
+$$
 
-The resulting challenge polynomial $c \in R_q$ is derived via the hash:
-$$ c = \mathcal{H}(\mu || w_1) $$
-To prevent private key leakage via rejection sampling dependencies, the signature $\sigma$ outputs securely bounded vectors:
-$$ \mathbf{z} = \mathbf{y} + c \cdot \mathbf{s}_1 $$
-If $\mathbf{z}$ exceeds strict coefficient boundaries ($||\mathbf{z}||_\infty \ge \gamma_1 - \beta$), the signer *aborts* and retries, natively guaranteeing constant-time statistical zero-knowledge of the secret key $\mathbf{s}_1$.
+Where $n = 256$ and $q = 8380417$. This specific prime is chosen to explicitly support the Number Theoretic Transform (NTT), allowing for highly optimized polynomial multiplication.
 
----
+### 1.2 Signature Generation & Fiat-Shamir with Aborts
+When the user generates a transaction intent (e.g., "Transfer 10 USDC"), the Rust client generates a signature utilizing the Fiat-Shamir with Aborts framework.
 
-## 2. Off-Chain Consensus: SP1 RISC-V Arithmetic (STARKs)
-Because ML-DSA signatures are mathematically massive (ranging from 2.4KB to 4.6KB) and structurally unsupported natively by the EVM, verifying them directly on Ethereum would violate the block gas limit exponentially.
+The signer generates a masking vector $\mathbf{y}$ and computes a challenge polynomial $c \in R_q$. To prevent the signature from leaking information about the private key $\mathbf{s}_1$, the output vector $\mathbf{z}$ is computed as:
 
-The `2-sp1-coprocessor` completely decouples this computation using **SP1**—a 100% open-source RISC-V zero-knowledge virtual machine (zkVM).
+$$
+\mathbf{z} = \mathbf{y} + c \cdot \mathbf{s}_1
+$$
+
+If the coefficients of $\mathbf{z}$ fall outside strict mathematical boundaries ($||\mathbf{z}||_\infty \ge \gamma_1 - \beta$), the signer aborts the process and retries. This natively guarantees statistical zero-knowledge of the secret key.
+
+## 2. Off-Chain Consensus: SP1 RISC-V Arithmetization (STARKs)
+Because ML-DSA signatures are massive (~2.4KB) and structurally unsupported by the Ethereum Virtual Machine (EVM), verifying them directly on-chain would violate block gas limits.
+
+The 2-sp1-coprocessor completely decouples this computation using SP1—an open-source RISC-V zero-knowledge virtual machine.
 
 ### 2.1 Plonkish Arithmetization
-SP1 translates the standard Rust Dilithium verification matrix directly into an algebraic execution trace. It utilizes a **Plonkish** arithmetization architecture, tracking variable columns $W$ and selector polynomial vectors across $N$ trace lengths.
+SP1 translates the Rust-based Dilithium verification logic into an algebraic execution trace. It utilizes a Plonkish arithmetization architecture, tracking state transitions across $N$ execution steps.
 
-The VM ensures state transitions $T_i \to T_{i+1}$ (e.g., RISC-V opcodes) are mathematically continuous via constraint equations evaluated identically at zero:
-$$ P(x) = Z(x) \cdot Q(x) $$
-Where $Z(x)$ is the vanishing polynomial $\prod (X - \omega^i)$.
+The VM ensures that every computational step (e.g., RISC-V opcodes) is mathematically valid via constraint equations. These constraints are combined into a single polynomial equation that must evaluate to zero at specific points:
+
+$$
+P(x) = Z(x) \cdot Q(x)
+$$
+
+Where $Z(x)$ is the vanishing polynomial.
 
 ### 2.2 The FRI Commitment and STARK Compression
-To commit the massive execution trace generated by the lattice-verification without revealing it, SP1 uses **FRI (Fast Reed-Solomon Interactive Oracle Proofs of Proximity)**.
-1. The execution trace polynomial is extended via the Reed-Solomon code into a vastly larger Merkle Tree.
-2. The network iteratively folds the polynomial by drawing out of bounds $\mathcal{O}(log(d))$ queries:
-   $$ f_i(x) = f_{i-1}(x^2) + \alpha \cdot x \cdot g_{i-1}(x^2) $$
-3. This recursively compresses the Gigabytes of RISC-V execution cycles verifying the Dilithium Hash Matrix down to a deterministic **STARK Proof**, measuring just over a few hundred kilobytes.
+To prove this execution trace is valid without forcing the EVM to re-run the gigabytes of computation, SP1 uses FRI (Fast Reed-Solomon Interactive Oracle Proofs of Proximity).
 
----
+The execution trace polynomial is extended via a Reed-Solomon code and committed to a Merkle Tree.
 
-## 3. L2 Settlement: Mathematical Spoofing & Replay Dynamics
-In Phase 4, the L2 vault strictly enforces physical on-chain constraints against the yielded STARK proof. You cannot submit an arbitrary proof; you must submit a STARK proof that resolves the `ISP1Verifier` contract utilizing the exact verification key hash $\mathcal{K}_{vKey}$ generated by the RISC-V program.
+The prover iteratively folds the polynomial, compressing its degree by half at each step:
+
+$$
+f_i(x) = f_{i-1}(x^2) + \alpha \cdot x \cdot g_{i-1}(x^2)
+$$
+
+This recursive folding compresses the massive RISC-V execution trace down to a deterministic, highly efficient STARK Proof that costs a flat, cheap gas fee to verify on Ethereum.
+
+## 3. L2 Settlement & Threat Mitigation
+In Phase 4, the Base Sepolia L2 vault strictly enforces mathematical constraints on the submitted STARK proof. You cannot submit an arbitrary proof; it must resolve against the Succinct ISP1Verifier utilizing the exact verification key hash ($\mathcal{K}_{vKey}$) generated by the authorized RISC-V program.
 
 ### 3.1 Resolving Replay Attack Vectors
-Because blockchains are publicly transparent state machines, a malicious Chainlink actor could observe an authorized execution and continuously pipe the verified STARK journal back through the `executeIntent` hook.
+Because blockchains are publicly transparent, a malicious actor could theoretically observe an authorized Chainlink execution, copy the STARK proof, and continuously resubmit it to drain the smart wallet.
 
-To structurally annihilate this, Phase 4 incorporates **Intent Hashing (Replay Protection)** natively on the blockchain:
-$$ \mathcal{H}_{req} = \text{keccak256}(PublicValues_{calldata}) $$
-The STARK proof is isolated into a collision-resistant topological mapping: `mapping(bytes32 => bool) executedIntents`. A proof is uniquely mathematically tied to its underlying instruction (`Transfer 10 USDC`). Any secondary submission attempting to leverage the same mathematical signature immediately evaluates to true in the mapping lookup, prompting the Ethereum virtual machine to permanently revert the block transaction.
+To mitigate this, Phase 4 incorporates Intent Hashing (Replay Protection) natively at the smart contract level. The intent journal is hashed:
+
+$$
+\mathcal{H}_{req} = \text{keccak256}(\text{PublicValues})
+$$
+
+This hash is mapped to a state boolean (`mapping(bytes32 => bool) executedIntents`). A STARK proof is uniquely tied to its underlying instruction. Any secondary transaction attempting to leverage the same proof will immediately evaluate to true in the state mapping, prompting the EVM to revert the transaction and securely lock the vault against double-spends.
