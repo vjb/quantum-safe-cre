@@ -29,7 +29,7 @@ cd ..
 
 # 4. Compile the Docker Architecture (Phase 2)
 echo "Building the SP1 ZK-Coprocessor Image..."
-sudo docker build -t zkvm-coprocessor .
+sudo DOCKER_BUILDKIT=1 docker build -t zkvm-coprocessor .
 
 # 5. Execute the Core SNARK Generation (Phase 3)
 echo "Executing Plonk Proof Generation. This will max out CPU cores and consumes >64GB RAM..."
