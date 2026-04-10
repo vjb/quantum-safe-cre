@@ -64,5 +64,4 @@ graph TD
 ## Execution
 Run `cre simulate workflow.yaml` inside the `3-chainlink-cre` directory to initiate the end-to-end multi-network validation.
 
-## Mathematical Architecture & Whitepaper
-For an institutional deep dive into the specific algebraic parameters driving this infrastructure, review the comprehensive **[Cryptographic Architecture & Mathematical Threat Models (LaTeX)](./docs/cryptographic_architecture.md)** whitepaper. It covers NTT transformation rings for ML-DSA and PLONKish Arithmetization mappings for the SP1 zero-knowledge virtual machine.
+

@@ -9,6 +9,11 @@ RUN curl -L https://sp1.succinct.xyz | bash
 ENV PATH="/root/.sp1/bin:${PATH}"
 RUN sp1up
 
+# Fix SP1 'cargo' custom toolchain propagation bug in Docker.
+# Succinct's sp1up installs a custom toolchain to ~/.rustup, but rust:bookworm uses /usr/local/rustup.
+RUN ln -s /root/.rustup/toolchains/* /usr/local/rustup/toolchains/ 2>/dev/null || true
+RUN for chain in /usr/local/rustup/toolchains/*; do cp /usr/local/cargo/bin/cargo "$chain/bin/cargo" 2>/dev/null || true; done
+
 # Set up project workspace
 WORKDIR /app
 COPY . .
