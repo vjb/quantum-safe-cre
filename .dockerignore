@@ -1,7 +1,18 @@
+# Rust & Cargo
 target/
-.git/
+**/target/
+Cargo.lock
+
+# Node
 node_modules/
-docs/
-.env
-proof.json
-intent.json
+npm-debug.log
+dist/
+
+# SP1 / Zero Knowledge Artifacts
+*.elf
+*.bin
+docs/demo_execution_logs.txt
+
+# Git
+.git/
+.gitignore

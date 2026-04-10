@@ -9,11 +9,6 @@ RUN curl -L https://sp1.succinct.xyz | bash
 ENV PATH="/root/.sp1/bin:${PATH}"
 RUN sp1up
 
-# Fix SP1 'cargo' custom toolchain propagation bug in Docker.
-# Succinct's sp1up installs a custom toolchain to ~/.rustup, but rust:bookworm uses /usr/local/rustup.
-RUN ln -s /root/.rustup/toolchains/* /usr/local/rustup/toolchains/ 2>/dev/null || true
-RUN for chain in /usr/local/rustup/toolchains/*; do cp /usr/local/cargo/bin/cargo "$chain/bin/cargo" 2>/dev/null || true; done
-
 # Set up project workspace
 WORKDIR /app
 COPY . .
@@ -22,8 +17,21 @@ COPY . .
 WORKDIR /app/1-client
 RUN cargo run
 
+# Pre-compile the SP1 guest program natively using cargo-prove to completely bypass rustup proxy bugs
+WORKDIR /app/2-sp1-coprocessor/program
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    cargo prove build
+
 # Phase 2: Execute the STARK ZK-Coprocessor 
 # Executing inside the Linux container completely isolates the process from Windows NTFS file locking collisions (error 32)
 WORKDIR /app/2-sp1-coprocessor/script
 ENV RUST_LOG="info"
-CMD ["cargo", "run", "--release"]
+
+# Enable BuildKit caching for the cargo registry and build target
+# This prevents Docker from recompiling the entire SP1 universe if you change 1 line of code.
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/2-sp1-coprocessor/target \
+    SP1_SKIP_GUEST_BUILD=1 cargo build --release && \
+    cp /app/2-sp1-coprocessor/target/release/script /usr/local/bin/zkvm-script
+
+CMD ["zkvm-script"]

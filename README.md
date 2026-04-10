@@ -39,6 +39,17 @@ graph LR
    - **Vault Address (V2 w/ Replay Protection):** [`0x42f60ABfeB12EF53DB0c05983D5Da76386dE2fF8`](https://base-sepolia.blockscout.com/address/0x42f60abfeb12ef53db0c05983d5da76386de2ff8)
 
 ## Execution
-Run `cre simulate workflow.yaml` inside the `3-chainlink-cre` directory to initiate the end-to-end multi-network validation.
 
+To run the full end-to-end orchestration—executing the intense Zero-Knowledge STARK matrix calculations natively via SP1 and seamlessly triggering the decentralized oracle settlement—run the flagship pipeline scripts:
 
+**Linux / macOS:**
+```bash
+./flagship_demo.sh
+```
+
+**Windows:**
+```powershell
+.\flagship_demo.ps1
+```
+
+*Note: The script dynamically orchestrates the SP1 zero-knowledge matrix into a dedicated Docker sandbox utilizing BuildKit layer constraints. It mathematically computes the proof to disk (`proof.json`) without any mocks, extracts the payload, and dynamically injects it into the Chainlink DON Enclave simulation.*

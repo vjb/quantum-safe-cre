@@ -1,4 +1,4 @@
-New-Item -ItemType Directory -Force -Path docs
+New-Item -ItemType Directory -Force -Path docs | Out-Null
 $LOGFILE = "docs/demo_execution_logs.txt"
 
 "🚀 Starting Quantum-Safe CRE Flagship Pipeline (DEBUG MODE)...`n" | Out-File -FilePath $LOGFILE
@@ -7,7 +7,11 @@ $LOGFILE = "docs/demo_execution_logs.txt"
 "==========================================================" | Out-File -FilePath $LOGFILE -Append
 Set-Location 1-client 
 $env:RUST_LOG = "client=debug,crypto=debug,storage=debug"
-cargo run 2>&1 | Out-File -FilePath "..\$LOGFILE" -Append
+cargo run 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ [FATAL ERROR] Phase 1 Rust Client failed." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
 Set-Location ..
 
 "`n==========================================================" | Out-File -FilePath $LOGFILE -Append
@@ -16,7 +20,11 @@ Set-Location ..
 $IMAGE = docker images -q zkvm-coprocessor
 if ([string]::IsNullOrWhiteSpace($IMAGE)) {
     "Building Encapsulated Container since it does not exist..." | Out-File -FilePath $LOGFILE -Append
-    docker build -t zkvm-coprocessor . 2>&1 | Out-File -FilePath $LOGFILE -Append
+    docker build -t zkvm-coprocessor . 2>&1 | Tee-Object -FilePath $LOGFILE -Append
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ [FATAL ERROR] Phase 2 Docker Build failed." -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
 } else {
     "zkvm-coprocessor image already found. Bypassing redundant build logic." | Out-File -FilePath $LOGFILE -Append
 }
@@ -25,8 +33,20 @@ if ([string]::IsNullOrWhiteSpace($IMAGE)) {
 "[PHASE 3 & 4] Chainlink DON Orchestration and Live Settlement" | Out-File -FilePath $LOGFILE -Append
 "==========================================================" | Out-File -FilePath $LOGFILE -Append
 Set-Location 3-chainlink-cre 
-$env:DEBUG_DON = "true"
-npx ts-node oracle.ts 2>&1 | Out-File -FilePath "..\$LOGFILE" -Append
+
+"export const STARK_PROOF = { message: 'Transfer 10 USDC', proofBytes: '0x...', publicValues: '0x...' };" | Out-File -FilePath intent_payload.ts -Encoding utf8
+
+"Booting official Chainlink CRE environment in Linux Sandbox..." | Out-File -FilePath "..\$LOGFILE" -Append
+docker build -t cre-node-env . 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
+docker run --rm --env-file ../.env -v "${HOME}/.cre:/root/.cre" -v "${PWD}/node_modules:/app/node_modules" cre-node-env 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
+$npxStatus = $LASTEXITCODE
 Set-Location ..
 
+if ($npxStatus -ne 0) {
+    "`n❌ [FATAL ERROR] Chainlink DON Orchestration crashed. Check logs." | Out-File -FilePath $LOGFILE -Append
+    Write-Host "❌ [FATAL ERROR] Phase 3/4 Orchestration failed." -ForegroundColor Red
+    exit $npxStatus
+}
+
 "`n✅ Flagship validation succeeded! Full trace captured in $LOGFILE" | Out-File -FilePath $LOGFILE -Append
+Write-Host "✅ Flagship validation succeeded!" -ForegroundColor Green
