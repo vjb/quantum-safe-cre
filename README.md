@@ -17,39 +17,16 @@ The EVM verifies the STARK proof for flat, cheap gas, entirely ignorant of the m
 ### Architecture Flow
 
 ```mermaid
-graph TD
+graph LR
     classDef client fill:#E0F7FA,stroke:#00BCD4,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef zk fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef link fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef base fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000000,rx:8px,ry:8px;
 
-    subgraph Phase1 ["1. Post-Quantum Client"]
-        A["User Intent: 'Transfer 10 USDC'"]:::client -->|"Sign"| B("intent.json"):::client
-    end
-
-    subgraph Phase3_Start ["3. Chainlink DON (Trigger)"]
-        G["Webhook"]:::link -->|"cre simulate"| H["oracle.ts"]:::link
-    end
-
-    subgraph Phase2 ["2. ZK-Coprocessor (Docker)"]
-        C["Host Orchestrator"]:::zk -->|"Load Inputs"| D{"SP1 zkVM"}:::zk
-        D -->|"pqc_dilithium::verify"| E["Process Lattice Math"]:::zk
-        E -->|"Generate STARK"| F["STARK Proof"]:::zk
-    end
-
-    subgraph Phase3_End ["3. Chainlink DON (Consensus)"]
-        H2["Validate Journal"]:::link -->|"Enforce Rules"| I(("DON Consensus Achieved")):::link
-    end
-
-    B -.->|"2.4KB Signature"| C
-    H -->|"Execute SP1 Prover"| C
-    F -.->|"Return Compressed Proof"| H2
-    I -->|"Submit On-Chain"| J[("Base Sepolia L2 Vault")]:::base
-
-    style Phase1 fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
-    style Phase3_Start fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
-    style Phase2 fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
-    style Phase3_End fill:#fcfcfc,stroke:#cccccc,stroke-width:2px,stroke-dasharray: 4 4;
+    Client["1. Post-Quantum Client"]:::client -->|"Sign (ML-DSA)"| DON["3. Chainlink Node"]:::link
+    DON -->|"Execute Prove"| SP1{"2. ZK-Coprocessor"}:::zk
+    SP1 -->|"Return STARK Proof"| DON
+    DON -->|"L2 EVM Broadcast"| L2[("4. Base Sepolia Vault")]:::base
 ```
 
 *Figure 1: The Quantum-Safe CRE Pipeline. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from the EVM constraint. The Chainlink Decentralized Oracle Network dynamically orchestrates an isolated SP1 zkVM, mathematically proving the signature off-chain and compressing the computation into a cheap, gas-efficient STARK proof.*
