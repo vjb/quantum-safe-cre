@@ -3,14 +3,17 @@ set -e
 
 echo "🚀 Booting Quantum-Safe CRE GCP STARK Generator..."
 
-# 1. System Dependencies (Assuming Ubuntu/Debian)
-echo "Installing prerequisites (Rust, Docker, Build Tools)..."
+echo "Installing prerequisites (Rust, Docker, Build Tools, GCP Ops Agent)..."
 while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
     echo "Waiting for Ubuntu background security updates to release dpkg lock..."
     sleep 5
 done
 sudo apt-get update -y
 sudo apt-get install -y curl pkg-config libssl-dev protobuf-compiler build-essential docker.io
+
+echo "Booting GCP Ops Agent for Console Telemetry..."
+curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 
 # 2. Install Rust Toolchain
 if ! command -v cargo &> /dev/null; then
