@@ -20,6 +20,14 @@ proof.bin
 .env
 *.log
 
+# Foundry
+cache/
+out/
+broadcast/
+4-base-sepolia-vault/cache/
+4-base-sepolia-vault/out/
+4-base-sepolia-vault/broadcast/
+
 # Editor
 .vscode/
 .idea/

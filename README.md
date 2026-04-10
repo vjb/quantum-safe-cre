@@ -58,6 +58,8 @@ graph TD
 1. **`1-client`**: A Rust client that generates a user intent and secures it with an ML-DSA lattice signature.
 2. **`2-sp1-coprocessor`**: A Dockerized RISC-V Zero-Knowledge VM that ingests the intent, runs the lattice verification, and outputs a cryptographic STARK proof.
 3. **`3-chainlink-cre`**: The local Chainlink node orchestrator (TypeScript) that triggers the prover, validates the STARK journal to prevent tampering, and achieves decentralized consensus.
+4. **`4-base-sepolia-vault`**: The L2 Settlement Layer. A Solidity smart contract deployed on Base Sepolia. It acts as the final settlement vault, utilizing Succinct's on-chain verifier to cheaply validate the STARK proof orchestrated by Chainlink, finalizing the post-quantum transaction on Ethereum.
+   - **Vault Address:** [`0x35a53F5E8286c93d92d4C427524721e8Eb3454d3`](https://base-sepolia.blockscout.com/address/0x35a53F5E8286c93d92d4C427524721e8Eb3454d3)
 
 ## Execution
 Run `cre simulate workflow.yaml` inside the `3-chainlink-cre` directory to initiate the end-to-end multi-network validation.

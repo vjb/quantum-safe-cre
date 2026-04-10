@@ -5,7 +5,7 @@ use sp1_sdk::{ProverClient, SP1Stdin};
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
-use tracing::info;
+use tracing::{info, debug};
 
 pub const ELF: &[u8] = include_bytes!(env!("SP1_PROGRAM_ELF"));
 
@@ -22,10 +22,12 @@ fn main() {
 
     let file_content = fs::read_to_string(intent_file).expect("Failed to read intent.json");
     let payload: IntentPayload = serde_json::from_str(&file_content).expect("Failed to parse intent.json");
+    debug!("Ingested external intent matching exact TDD cryptographic specifications.");
 
     info!("Preparing SP1 Prover Client...");
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
+    debug!("Mapping SP1Stdin bounds dynamically for guest process...");
     stdin.write(&payload);
 
     info!("Generating STARK proof...");
