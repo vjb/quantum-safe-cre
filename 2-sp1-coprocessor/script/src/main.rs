@@ -9,7 +9,8 @@ use tracing::{info, debug};
 
 pub const ELF: &[u8] = include_bytes!(env!("SP1_PROGRAM_ELF"));
 
-fn main() {
+#[tokio::main]
+async fn main() {
     tracing_subscriber::fmt::init();
     info!("Starting SP1 Host Orchestrator...");
 
@@ -25,7 +26,7 @@ fn main() {
     debug!("Ingested external intent matching exact TDD cryptographic specifications.");
 
     info!("Preparing SP1 Prover Client...");
-    let client = ProverClient::from_env();
+    let client = ProverClient::from_env().await;
     let mut stdin = SP1Stdin::new();
     debug!("Mapping SP1Stdin bounds dynamically for guest process...");
     stdin.write(&payload);
@@ -38,7 +39,7 @@ fn main() {
 
     // Attempt to generate a core STARK proof locally. 
     // This is computationally intensive.
-    let mut proof = client.prove(&pk, stdin).run().expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
+    let mut proof = client.prove(&pk, stdin).run().await.expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
     
     let commited_message = proof.public_values.read::<String>();
     let duration = start_time.elapsed();
@@ -70,9 +71,9 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_zkvm_rejects_invalid_intent() {
-        let client = ProverClient::from_env();
+    #[tokio::test]
+    async fn test_zkvm_rejects_invalid_intent() {
+        let client = ProverClient::from_env().await;
         let mut stdin = SP1Stdin::new();
         
         let payload = IntentPayload {
@@ -82,7 +83,7 @@ mod tests {
         };
         stdin.write(&payload);
         
-        let execution = client.execute(ELF, stdin).run();
+        let execution = client.execute(ELF, stdin).run().await;
         assert!(execution.is_err(), "SP1 Validation should panic on invalid sig");
     }
 }
