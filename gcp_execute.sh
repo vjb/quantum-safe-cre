@@ -9,7 +9,7 @@ while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
     sleep 5
 done
 sudo apt-get update -y
-sudo apt-get install -y curl pkg-config libssl-dev protobuf-compiler build-essential docker.io
+sudo apt-get install -y curl pkg-config libssl-dev protobuf-compiler build-essential docker.io docker-buildx
 
 echo "Booting GCP Ops Agent for Console Telemetry..."
 curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
