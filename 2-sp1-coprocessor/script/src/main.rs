@@ -1,7 +1,7 @@
 pub mod models;
 
 use models::IntentPayload;
-use sp1_sdk::{ProverClient, SP1Stdin};
+use sp1_sdk::{ProverClient, SP1Stdin, HashableKey};
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -30,18 +30,40 @@ fn main() {
     debug!("Mapping SP1Stdin bounds dynamically for guest process...");
     stdin.write(&payload);
 
-    info!("Generating STARK proof...");
+    info!("Generating STARK proof (this may take significant RAM/CPU bounds)...");
     let start_time = Instant::now();
     
-    // In SDK versions >= 2.0, execute() requires ELF directly.
-    let (mut public_values, _report) = client.execute(ELF, stdin).run().unwrap();
+    // Generate the proving and verifying keys
+    let (pk, vk) = client.setup(ELF);
+
+    // Attempt to generate a core STARK proof locally. 
+    // This is computationally intensive.
+    let proof = client.prove(&pk, stdin).run().expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
     
-    let commited_message = public_values.read::<String>();
+    let commited_message = proof.public_values.read::<String>();
     let duration = start_time.elapsed();
-    info!("Execution completed in {:?}", duration);
+    info!("Execution and STARK proving completed in {:?}", duration);
     
     assert_eq!(commited_message, payload.message);
     info!("Successfully verified and committed message: {}", commited_message);
+    
+    // Dump actual proof bytes and public values to hex strings for Chainlink Orchestrator
+    debug!("Serializing Proof and Public Values to disk...");
+    let proof_hex = hex::encode(proof.bytes());
+    // SP1 proof.public_values contains ABI encoded bounds. We'll extract raw bytes for Ethers format.
+    let pv_hex = hex::encode(proof.public_values.as_slice());
+    
+    let stark_output = serde_json::json!({
+        "proofBytes": format!("0x{}", proof_hex),
+        "publicValues": format!("0x{}", pv_hex),
+        "vkey": vk.bytes32()
+    });
+    
+    // Export proof output for Oracle ingestion via Docker mounted volume
+    fs::write("/app/output/proof.json", stark_output.to_string()).unwrap_or_else(|_| {
+        fs::write("../../proof.json", stark_output.to_string()).expect("Failed to write STARK proof to disk natively");
+    });
+    info!("STARK cryptographic envelope materialized successfully into proof.json");
 }
 
 #[cfg(test)]

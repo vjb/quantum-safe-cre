@@ -1,0 +1,7 @@
+target/
+.git/
+node_modules/
+docs/
+.env
+proof.json
+intent.json
