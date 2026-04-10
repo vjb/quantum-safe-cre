@@ -38,7 +38,7 @@ fn main() {
 
     // Attempt to generate a core STARK proof locally. 
     // This is computationally intensive.
-    let proof = client.prove(&pk, stdin).run().expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
+    let mut proof = client.prove(&pk, stdin).run().expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
     
     let commited_message = proof.public_values.read::<String>();
     let duration = start_time.elapsed();
