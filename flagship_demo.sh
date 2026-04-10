@@ -48,7 +48,11 @@ echo "export const STARK_PROOF = { message: 'Transfer 10 USDC', proofBytes: '${P
 
 echo "Booting official Chainlink CRE environment in Linux Sandbox..." | tee -a ../$LOGFILE
 # Build and run the real CRE simulation
-docker build -t cre-node-env . 2>&1 | tee -a ../$LOGFILE
+if [[ "$(docker images -q cre-node-env 2> /dev/null)" == "" ]]; then
+  docker build -t cre-node-env . 2>&1 | tee -a ../$LOGFILE
+else
+  echo "cre-node-env image already found. Bypassing redundant build logic." | tee -a ../$LOGFILE
+fi
 docker run --rm --env-file ../.env -v "${HOME}/.cre:/root/.cre" -v "${PWD}/node_modules:/app/node_modules" cre-node-env 2>&1 | tee -a ../$LOGFILE
 
 cd ..

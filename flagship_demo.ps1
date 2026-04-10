@@ -31,7 +31,12 @@ if ([string]::IsNullOrWhiteSpace($IMAGE)) {
 
 "Booting SP1 Coprocessor to compute STARK matrix natively..." | Out-File -FilePath $LOGFILE -Append
 docker run --rm -v "${PWD}:/app/output" -v "${PWD}/1-client/intent.json:/app/1-client/intent.json" zkvm-coprocessor 2>&1 | Tee-Object -FilePath $LOGFILE -Append
-
+$sp1Status = $LASTEXITCODE
+if ($sp1Status -ne 0) {
+    "`n❌ [FATAL ERROR] SP1 ZK-Coprocessor execution crashed. Check logs." | Out-File -FilePath $LOGFILE -Append
+    Write-Host "❌ [FATAL ERROR] Phase 2 SP1 Prover failed." -ForegroundColor Red
+    exit $sp1Status
+}
 "`n==========================================================" | Out-File -FilePath $LOGFILE -Append
 "[PHASE 3 & 4] Chainlink DON Orchestration and Live Settlement" | Out-File -FilePath $LOGFILE -Append
 "==========================================================" | Out-File -FilePath $LOGFILE -Append
@@ -47,7 +52,12 @@ Set-Location 3-chainlink-cre
 "export const STARK_PROOF = { message: 'Transfer 10 USDC', proofBytes: '$($proofData.proofBytes)', publicValues: '$($proofData.publicValues)' };" | Out-File -FilePath intent_payload.ts -Encoding utf8
 
 "Booting official Chainlink CRE environment in Linux Sandbox..." | Out-File -FilePath "..\$LOGFILE" -Append
-docker build -t cre-node-env . 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
+$CRE_IMAGE = docker images -q cre-node-env
+if ([string]::IsNullOrWhiteSpace($CRE_IMAGE)) {
+    docker build -t cre-node-env . 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
+} else {
+    "cre-node-env image already found. Bypassing redundant build logic." | Out-File -FilePath "..\$LOGFILE" -Append
+}
 docker run --rm --env-file ../.env -v "${HOME}/.cre:/root/.cre" -v "${PWD}/node_modules:/app/node_modules" cre-node-env 2>&1 | Tee-Object -FilePath "..\$LOGFILE" -Append
 $npxStatus = $LASTEXITCODE
 Set-Location ..
