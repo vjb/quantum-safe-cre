@@ -2,6 +2,7 @@ pub mod models;
 
 use models::IntentPayload;
 use sp1_sdk::{ProverClient, SP1Stdin, HashableKey, Prover};
+use sp1_sdk::prelude::*;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
