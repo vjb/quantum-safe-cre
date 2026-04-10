@@ -34,4 +34,24 @@ contract QuantumVaultTest is Test {
         // Execute
         vault.executeIntent(mockProof, mockPublicValues);
     }
+
+    function test_executeIntent_ReplayProtectionReverts() public {
+        string memory expectedMessage = "Transfer 10 USDC";
+        bytes memory mockPublicValues = abi.encode(expectedMessage);
+        bytes memory mockProof = "0xmockproof";
+
+        // Mock the SP1 verifier to return successfully
+        vm.mockCall(
+            mockVerifier,
+            abi.encodeWithSignature("verifyProof(bytes32,bytes,bytes)", mockVKey, mockPublicValues, mockProof),
+            abi.encode()
+        );
+
+        // First execution succeeds
+        vault.executeIntent(mockProof, mockPublicValues);
+
+        // Second execution MUST revert because of intentHash tracking
+        vm.expectRevert("Security Error: Intent already executed");
+        vault.executeIntent(mockProof, mockPublicValues);
+    }
 }
