@@ -25,7 +25,7 @@ fn main() {
     debug!("Ingested external intent matching exact TDD cryptographic specifications.");
 
     info!("Preparing SP1 Prover Client...");
-    let client = ProverClient::builder().build();
+    let client = ProverClient::from_env();
     let mut stdin = SP1Stdin::new();
     debug!("Mapping SP1Stdin bounds dynamically for guest process...");
     stdin.write(&payload);
@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_zkvm_rejects_invalid_intent() {
-        let client = ProverClient::builder().build();
+        let client = ProverClient::from_env();
         let mut stdin = SP1Stdin::new();
         
         let payload = IntentPayload {
