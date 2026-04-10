@@ -1,0 +1,12 @@
+name: QuantumSafeCRE
+version: 1.0.0
+trigger:
+  type: Webhook
+tasks:
+  - id: oracle-execution
+    type: custom-script
+    script: ./oracle.ts
+consensus:
+  type: DON
+  tasks:
+    - oracle-execution

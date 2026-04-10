@@ -1,0 +1,25 @@
+# Rust/Cargo
+/target/
+**/target/
+Cargo.lock
+**/*.rs.bk
+
+# Node.js
+node_modules/
+dist/
+build/
+.npm/
+
+# SP1 & Cryptography
+.sp1/
+program/elf/
+proof.bin
+
+# OS & Environment
+.DS_Store
+.env
+*.log
+
+# Editor
+.vscode/
+.idea/
