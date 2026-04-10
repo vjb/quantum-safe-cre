@@ -25,7 +25,7 @@ fn main() {
     debug!("Ingested external intent matching exact TDD cryptographic specifications.");
 
     info!("Preparing SP1 Prover Client...");
-    let client = ProverClient::new();
+    let client = ProverClient::builder().build();
     let mut stdin = SP1Stdin::new();
     debug!("Mapping SP1Stdin bounds dynamically for guest process...");
     stdin.write(&payload);
@@ -56,7 +56,7 @@ fn main() {
     let stark_output = serde_json::json!({
         "proofBytes": format!("0x{}", proof_hex),
         "publicValues": format!("0x{}", pv_hex),
-        "vkey": vk.bytes32()
+        "vkey": vk.bytes32().to_string()
     });
     
     // Export proof output for Oracle ingestion via Docker mounted volume
@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_zkvm_rejects_invalid_intent() {
-        let client = ProverClient::new();
+        let client = ProverClient::builder().build();
         let mut stdin = SP1Stdin::new();
         
         let payload = IntentPayload {
