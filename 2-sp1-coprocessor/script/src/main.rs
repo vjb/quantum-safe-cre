@@ -35,11 +35,12 @@ async fn main() {
     let start_time = Instant::now();
     
     // Generate the proving and verifying keys
-    let (pk, vk) = client.setup(ELF);
+    let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
+    let vk = pk.verifying_key();
 
     // Attempt to generate a core STARK proof locally. 
     // This is computationally intensive.
-    let mut proof = client.prove(&pk, stdin).run().await.expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
+    let mut proof = client.prove(&pk, stdin).core().await.expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
     
     let commited_message = proof.public_values.read::<String>();
     let duration = start_time.elapsed();
@@ -83,7 +84,7 @@ mod tests {
         };
         stdin.write(&payload);
         
-        let execution = client.execute(ELF, stdin).run().await;
+        let execution = client.execute(sp1_sdk::Elf::Static(ELF), stdin).await;
         assert!(execution.is_err(), "SP1 Validation should panic on invalid sig");
     }
 }
