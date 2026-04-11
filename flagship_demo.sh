@@ -2,6 +2,8 @@
 set -e
 set -o pipefail # CRITICAL: Prevents 'tee' from masking crashed exit codes
 
+source .env
+
 mkdir -p docs
 LOGFILE="docs/demo_execution_logs.txt"
 
@@ -69,8 +71,8 @@ echo "============================================================"
 # Adapted jq extraction to properly match the proof.json schema which contains .proofBytes natively.
 PROOF_BYTES=$(jq -r '.proofBytes' proof.json)
 PUBLIC_VALUES=$(jq -r '.publicValues' proof.json)
-INTENT_ID=$(jq -r '.publicValues' proof.json | sha256sum | awk '{print $1}')
-INTENT_BYTES32="0x${INTENT_ID}"
+INTENT_STR=$(jq -r '.message' 1-client/intent.json)
+INTENT_BYTES32=$(cast keccak "$INTENT_STR")
 
 echo "Target Vault: 0x42f60ABfeB12EF53DB0c05983D5Da76386dE2fF8"
 echo "Submitting STARK proof to L2..."
