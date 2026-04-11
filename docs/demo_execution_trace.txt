@@ -1,0 +1,44 @@
+**********************
+PowerShell transcript start
+Start time: 20260410223401
+Username: LAPTOP-R0PNTJPQ\vjbel
+RunAs User: LAPTOP-R0PNTJPQ\vjbel
+Configuration Name: 
+Machine: LAPTOP-R0PNTJPQ (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -noexit -command try { . "c:\Users\vjbel\AppData\Local\Programs\Antigravity\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 31320
+PSVersion: 7.0.3
+PSEdition: Core
+GitCommitId: 7.0.3
+OS: Microsoft Windows 10.0.19045
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.10032.0, 6.0.0, 6.1.0, 6.2.0, 7.0.3
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is docs/demo_execution_trace.txt
+🚀 [1/5] Initiating Google Cloud Ephemeral Orchestration...
+Project: centering-helix-493023-f7 | Zone: us-central1-a
+
+⚙️ Confirming Compute Engine APIs are bound...
+
+
+☁️ [2/5] Evaluating n2-highmem-32 Node State (zkvm-prover-spot-instance)...
+Instance is already RUNNING. Maximizing VM cache hits!
+
+⏳ Waiting 5 seconds for SSH connectivity over Google tunnel...
+
+🔥 [3/5] Syncing State & Executing Framework (Docker Cache enabled)...
+
+
+📥 [4/5] Extracting proof.json Plonk matrix to your local workspace...
+
+
+⚠️ [5/5] Skipping Terminate phase. The Google Cloud Instance (zkvm-prover-spot-instance) will remain RUNNING for faster debugging.
+
+✅ Pipeline Exited Successfully! The 'proof.json' artifact is mathematically bound and native to your CWD.
+**********************
+PowerShell transcript end
+End time: 20260410223525
+**********************

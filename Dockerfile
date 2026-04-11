@@ -45,7 +45,7 @@ RUN rm build.rs
 # This prevents Docker from recompiling the entire SP1 universe if you change 1 line of code.
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/app/2-sp1-coprocessor/target \
-    cargo update && cargo build --release && \
+    cargo build --release && \
     cp /app/2-sp1-coprocessor/target/release/script /usr/local/bin/zkvm-script
 
 CMD ["zkvm-script"]
