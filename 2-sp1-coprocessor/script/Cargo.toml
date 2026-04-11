@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sp1-sdk = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.0" }
+sp1-sdk = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.2" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 hex = "0.4"
@@ -13,4 +13,4 @@ tracing-subscriber = "0.3"
 tokio = { version = "1.51.1", features = ["macros", "rt-multi-thread"] }
 
 [build-dependencies]
-sp1-helper = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.0" }
+sp1-helper = { git = "https://github.com/succinctlabs/sp1", tag = "v6.0.2" }

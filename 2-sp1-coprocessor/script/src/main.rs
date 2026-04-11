@@ -37,15 +37,15 @@ async fn main() {
     
     // Generate the proving and verifying keys
     let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
-    let vk = pk.verifying_key();
-
-    let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).plonk().await {
+    // Attempt to generate a Groth16 proof locally. 
+    // This perfectly bypasses Plonk polynomial matrix overflow vulnerabilities when verifying massive PQC memory spans.
+    let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).groth16().await {
         Ok(p) => p,
         Err(e) => {
-            let error_trace = format!("CRITICAL PLONK WRAPPER TRACE: {:#?}", e);
+            let error_trace = format!("CRITICAL GROTH16 WRAPPER TRACE: {:#?}", e);
             eprintln!("{}", error_trace);
             std::fs::write("/app/output/FATAL_GNARK_TRACE.txt", error_trace).ok();
-            panic!("Plonk execution fatally collapsed!");
+            panic!("Groth16 execution fatally collapsed!");
         }
     };
     
