@@ -2,7 +2,14 @@
 FROM rust:bookworm
 
 # Install system dependencies required by SP1 and cryptographic crates
-RUN apt-get update && apt-get install -y clang cmake build-essential curl pkg-config libssl-dev protobuf-compiler docker.io && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y clang cmake build-essential curl pkg-config libssl-dev protobuf-compiler && rm -rf /var/lib/apt/lists/*
+
+# Install Docker CLI natively to bypass archaic Debian repository version mismatches (API 1.41 vs host 1.44)
+RUN curl -fsSL -O https://download.docker.com/linux/static/stable/x86_64/docker-26.0.0.tgz && \
+    tar xzvf docker-26.0.0.tgz && \
+    cp docker/docker /usr/local/bin/ && \
+    chmod +x /usr/local/bin/docker && \
+    rm -rf docker docker-26.0.0.tgz
 
 # Install SP1 toolchain and CLI
 RUN curl -L https://sp1.succinct.xyz | bash
