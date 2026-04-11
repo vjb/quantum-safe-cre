@@ -39,12 +39,12 @@ async fn main() {
     let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
     let vk = pk.verifying_key();
 
-    // Attempt to generate a Plonk proof locally. 
-    // This is computationally intensive.
     let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).plonk().await {
         Ok(p) => p,
         Err(e) => {
-            println!("CRITICAL PLONK WRAPPER TRACE: {:#?}", e);
+            let error_trace = format!("CRITICAL PLONK WRAPPER TRACE: {:#?}", e);
+            eprintln!("{}", error_trace);
+            std::fs::write("/app/output/FATAL_GNARK_TRACE.txt", error_trace).ok();
             panic!("Plonk execution fatally collapsed!");
         }
     };
