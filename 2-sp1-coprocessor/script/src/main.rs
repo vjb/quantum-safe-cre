@@ -37,6 +37,8 @@ async fn main() {
     
     // Generate the proving and verifying keys
     let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
+    let vk = pk.verifying_key();
+
     // Attempt to generate a Groth16 proof locally. 
     // This perfectly bypasses Plonk polynomial matrix overflow vulnerabilities when verifying massive PQC memory spans.
     let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).groth16().await {
