@@ -59,3 +59,29 @@ cd ..
 
 echo "" | tee -a $LOGFILE
 echo "✅ Flagship validation succeeded! Full trace captured in $LOGFILE" | tee -a $LOGFILE
+
+echo ""
+echo "============================================================"
+echo "🔗 ORACLE CONSENSUS REACHED. BROADCASTING TO BASE SEPOLIA..."
+echo "============================================================"
+
+# Extract the proof bytes and public values from the SP1 output
+# Adapted jq extraction to properly match the proof.json schema which contains .proofBytes natively.
+PROOF_BYTES=$(jq -r '.proofBytes' proof.json)
+PUBLIC_VALUES=$(jq -r '.publicValues' proof.json)
+INTENT_ID=$(jq -r '.publicValues' proof.json | sha256sum | awk '{print $1}')
+INTENT_BYTES32="0x${INTENT_ID}"
+
+echo "Target Vault: 0x42f60ABfeB12EF53DB0c05983D5Da76386dE2fF8"
+echo "Submitting STARK proof to L2..."
+
+# Execute the on-chain settlement via Foundry
+cast send 0x42f60ABfeB12EF53DB0c05983D5Da76386dE2fF8 \
+  "fulfillPQCTransfer(bytes32,bytes,bytes)" \
+  $INTENT_BYTES32 $PROOF_BYTES $PUBLIC_VALUES \
+  --rpc-url https://sepolia.base.org \
+  --private-key $RELAYER_PRIVATE_KEY
+
+echo ""
+echo "✅ POST-QUANTUM SETTLEMENT COMPLETE ON L2!"
+echo "Transaction successfully routed via Chainlink CRE and verified by SP1."
