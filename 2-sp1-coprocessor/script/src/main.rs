@@ -41,7 +41,7 @@ async fn main() {
 
     // Attempt to generate a Plonk proof locally. 
     // This is computationally intensive.
-    let mut proof = client.prove(&pk, stdin).plonk().run().await.expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
+    let mut proof: sp1_sdk::SP1ProofWithPublicValues = client.prove(&pk, stdin).plonk().await.expect("Failed to generate STARK Proof. Host machine may have hit OOM limits.");
     
     let commited_message = proof.public_values.read::<String>();
     let duration = start_time.elapsed();
