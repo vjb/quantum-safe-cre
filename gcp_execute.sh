@@ -34,7 +34,7 @@ sudo env DOCKER_BUILDKIT=1 docker build -t zkvm-coprocessor .
 # 5. Execute the Core SNARK Generation (Phase 3)
 echo "Executing Plonk Proof Generation. This will max out CPU cores and consumes >64GB RAM..."
 # Notice: We explicitly REMOVED the `SP1_PROVER=mock` override to force a mathematically legitimate Plonk Proof blob!
-sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root/.sp1:/root/.sp1 -v /tmp:/tmp -v "$(pwd):/app/output" -v "$(pwd)/1-client/intent.json:/app/1-client/intent.json" zkvm-coprocessor
+sudo docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root/.sp1/circuits:/root/.sp1/circuits -v /tmp:/tmp -v "$(pwd):/app/output" -v "$(pwd)/1-client/intent.json:/app/1-client/intent.json" zkvm-coprocessor
 
 echo "✅ SUCCESS! Your authentic STARK payload has been serialized to:"
 ls -la proof.json
