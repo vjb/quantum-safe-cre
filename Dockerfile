@@ -15,7 +15,7 @@ RUN curl -fsSL -O https://download.docker.com/linux/static/stable/x86_64/docker-
 RUN curl -L https://sp1.succinct.xyz | bash
 ENV PATH="/root/.sp1/bin:${PATH}"
 # Cryptographically pin the CLI version to guarantee ELF geometric parity with SP1 SDK 6.0.2
-RUN sp1up -v v6.0.2
+RUN sp1up -v v6.0.0
 
 # Set up project workspace
 WORKDIR /app
