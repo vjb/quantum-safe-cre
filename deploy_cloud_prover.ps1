@@ -74,7 +74,7 @@ gcloud compute ssh $INSTANCE_NAME `
 
 # 4. Pull Artifact Locally
 Write-Host "`n📥 [4/5] Extracting proof.json Plonk matrix to your local workspace..." -ForegroundColor Cyan
-gcloud compute scp "$($INSTANCE_NAME):~/quantum-safe-cre/proof.json" "./proof.json" `
+gcloud compute scp "$($INSTANCE_NAME):quantum-safe-cre/proof.json" "./proof.json" `
     --project=$PROJECT_ID `
     --zone=$ZONE `
     --strict-host-key-checking=no `

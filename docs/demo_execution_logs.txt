@@ -3,29 +3,10 @@
 ==========================================================
 [PHASE 1] Local Client: Post-Quantum Intent Generation
 ==========================================================
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
-     Running `target\debug\client.exe`
-[2m2026-04-10T19:53:33.617574Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Starting 1-client Intent Generator...
-[2m2026-04-10T19:53:33.617663Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Generating Dilithium keypair...
-[2m2026-04-10T19:53:33.622490Z[0m [32m INFO[0m [2mclient::crypto[0m[2m:[0m Signing intent payload...
-[2m2026-04-10T19:53:33.640465Z[0m [34mDEBUG[0m [2mclient[0m[2m:[0m Payload constructed with Message: 'Transfer 10 USDC', Key Length: 3904, Sig Length: 6586
-[2m2026-04-10T19:53:33.642547Z[0m [32m INFO[0m [2mclient::storage[0m[2m:[0m Successfully exported intent to intent.json. Size: 10572 bytes
-[2m2026-04-10T19:53:33.642601Z[0m [32m INFO[0m [2mclient[0m[2m:[0m Success! intent.json has been written to disk.
 
 ==========================================================
 [PHASE 2] Docker execution bounding
 ==========================================================
-zkvm-coprocessor image already found. Bypassing redundant build logic.
-Booting SP1 Coprocessor to compute STARK matrix natively...
-[2m2026-04-10T19:53:34.564672Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Starting SP1 Host Orchestrator...
-[2m2026-04-10T19:53:34.578216Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Preparing SP1 Prover Client...
-[2m2026-04-10T19:53:34.578316Z[0m [32m INFO[0m [2msp1_sdk::mock[0m[2m:[0m initializing mock prover
-[2m2026-04-10T19:53:36.149653Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Generating STARK proof (this may take significant RAM/CPU bounds)...
-[2m2026-04-10T19:53:45.633349Z[0m [32m INFO[0m [2msp1_sdk::mock[0m[2m:[0m generating mock proof [3mmode[0m[2m=[0mPlonk
-[2m2026-04-10T19:53:45.659128Z[0m [32m INFO[0m [2msp1_prover::worker::prover::execute[0m[2m:[0m public_value_stream: [16, 0, 0, 0, 0, 0, 0, 0, 84, 114, 97, 110, 115, 102, 101, 114, 32, 49, 48, 32, 85, 83, 68, 67]
-[2m2026-04-10T19:53:45.837921Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Execution and STARK proving completed in 9.688213315s
-[2m2026-04-10T19:53:45.837973Z[0m [32m INFO[0m [2mscript[0m[2m:[0m Successfully verified and committed message: Transfer 10 USDC
-[2m2026-04-10T19:53:45.842757Z[0m [32m INFO[0m [2mscript[0m[2m:[0m STARK cryptographic envelope materialized successfully into proof.json
 
 ==========================================================
 [PHASE 3 & 4] Chainlink DON Orchestration and Live Settlement
@@ -39,19 +20,19 @@ Compiling workflow...
 ✓ Workflow compiled
 ✓ Simulation limits enabled
   HTTP: req=10kb resp=100kb timeout=10s | ConfHTTP: req=10kb resp=100kb timeout=10s | Consensus obs=100kb | ChainWrite report=5kb gas=5000000 | WASM binary=100mb compressed=20mb
-  Binary hash: 910fef7490a51150caa8e70fa0178d1e1077e84c07fd5c868a78e74fc586c44f
+  Binary hash: f03451eec2fd0e60365b2e5462d67269ef9a64f52b76557159a6312de6308ca2
   Config hash: bb68dc1abc9cb717a20ad331a4bcf1d25396d81d48ff6c17f442162be64712ab
-2026-04-10T19:54:01Z [SIMULATION] Simulator Initialized
+2026-04-11T05:16:59Z [SIMULATION] Simulator Initialized
 
-2026-04-10T19:54:01Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Booting WASM Enclave Validation...
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Intercepting Off-Chain SP1 Coprocessor Payload...
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Mathematical STARK Proof Ingested (5 bytes)
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Public Journal Extracted: "Transfer 10 USDC"
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Decrypting intent constraints...
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] ✓ Intent matches User Signature.
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] 🟢 BFT CONSENSUS ACHIEVED. Cryptographic math verified.
-2026-04-10T19:54:01Z [USER LOG] [CHAINLINK DON] Routing STARK to Base Sepolia Settlement Vault...
+2026-04-11T05:16:59Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] Booting WASM Enclave Validation...
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] Intercepting Off-Chain SP1 Coprocessor Payload...
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] ✓ Mathematical STARK Proof Ingested (5 bytes)
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] ✓ Public Journal Extracted: "Transfer 10 USDC"
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] Decrypting intent constraints...
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] ✓ Intent matches User Signature.
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] 🟢 BFT CONSENSUS ACHIEVED. Cryptographic math verified.
+2026-04-11T05:17:00Z [USER LOG] [CHAINLINK DON] Routing STARK to Base Sepolia Settlement Vault...
 
 ✓ Workflow Simulation Result:
 {
@@ -59,8 +40,8 @@ Compiling workflow...
   "verdict": "VALID"
 }
 
-2026-04-10T19:54:01Z [SIMULATION] Execution finished signal received
-2026-04-10T19:54:01Z [SIMULATION] Skipping WorkflowEngineV2
+2026-04-11T05:17:00Z [SIMULATION] Execution finished signal received
+2026-04-11T05:17:00Z [SIMULATION] Skipping WorkflowEngineV2
 
 ╭──────────────────────────────────────────────────────╮
 │ Simulation complete! Ready to deploy your workflow?  │
