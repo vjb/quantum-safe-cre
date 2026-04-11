@@ -12,7 +12,12 @@ This architecture bypasses the EVM bottleneck by decoupling the heavy cryptograp
 
 We utilize a **ZK-Coprocessor (SP1)** to grind the lattice math off-chain, proving the signature is valid, and compressing it into a highly efficient STARK proof. We then utilize the **Chainlink Decentralized Oracle Network (via the Runtime Environment)** to orchestrate this process, validate the inputs against malicious provers, and deliver the STARK proof to the Layer 2 smart contract.
 
-The EVM verifies the STARK proof for flat, cheap gas, entirely ignorant of the massive quantum math that occurred off-chain.
+SP1 generates a STARK trace and compresses it via a Groth16 SNARK wrapper for EVM verification. The blockchain validates this zero-knowledge artifact for flat, cheap gas, entirely ignorant of the massive quantum math that occurred off-chain.
+
+### Current Limitations & Future Roadmap
+**The Groth16 Transpilation Trap**: To achieve EVM composability on Base Sepolia today, this architecture utilizes a Groth16 wrapper over the SP1 STARK. Because Groth16 relies on the BN254 elliptic curve, the final on-chain settlement is theoretically vulnerable to Shor's algorithm. 
+
+The End-State architecture targets STARK-native rollups (like StarkNet) to verify the pure hash-based STARK directly. This fully bypasses the SNARK curve dependencies, achieving 100% end-to-end quantum resistance.
 
 ### Architecture Flow
 
