@@ -28,22 +28,45 @@ The End-State architecture targets STARK-native rollups (like StarkNet) to verif
 ### Architecture Flow
 
 ```mermaid
-graph TD
+graph LR
     classDef client fill:#E0F7FA,stroke:#00BCD4,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef zk fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef link fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef base fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef gcp fill:#FFF8E1,stroke:#FFC107,stroke-width:2px,color:#000000,rx:8px,ry:8px;
 
-    Client["1. Post-Quantum Client"]:::client -->|"Sign (ML-DSA)"| DON["2. Chainlink DON"]:::link
-    DON -->|"Job Webhook"| CR["3. Google Cloud Run (Serverless API)"]:::gcp
-    CR -->|"Provision Spot Template"| GCP["4. GCP n2-highmem-32 VM"]:::gcp
-    GCP -->|"Execute Prove & Drop Artifact"| SP1{"5. SP1 ZK-Coprocessor"}:::zk
-    SP1 -->|"Upload Proof Payload"| Storage[("GCS Bucket")]:::gcp
-    Storage -->|"Webhook Resume Callback"| GCP
-    GCP -->|"Finalize Trace"| CR
-    CR -->|"Provide Proof Payload"| DON
-    DON -->|"L2 EVM Broadcast"| L2[("6. Base Sepolia Vault")]:::base
+    subgraph User Environment
+        Client["1. Rust Client<br>(Generates ML-DSA Intent)"]:::client
+    end
+
+    subgraph Decentralized Oracle Network
+        DON["2. Chainlink Node<br>(Core EA Router)"]:::link
+    end
+
+    subgraph Google Cloud Architecture
+        CR["3. Cloud Run Serverless API<br>(Async Webhook Receiver)"]:::gcp
+        GCP["4. GCP n2-highmem-32<br>(Ephemeral Spot Array)"]:::gcp
+        Storage[("GCS Bucket<br>(Proof Artifacts)")]:::gcp
+    end
+
+    subgraph Zero-Knowledge Layer
+        SP1{"5. SP1 RISC-V Coprocessor<br>(Lattice Math & STARK Compression)"}:::zk
+    end
+
+    subgraph Ethereum Network
+        L2[("6. Base Sepolia EVM Vault<br>(On-chain Groth16 Verifier)")]:::base
+    end
+
+    %% Execution Flow Mapping
+    Client -->|"1. Signs Target Intent"| DON
+    DON -->|"2. Dispatches EA HTTP Trigger"| CR
+    CR -->|"3. Natively Provisions via SDK"| GCP
+    GCP -->|"4. Injects Isolated Workload"| SP1
+    SP1 -.->|"5. Securely Drops proof.json"| Storage
+    Storage -.->|"6. Validates Computation"| GCP
+    GCP -->|"7. Executes Async Resume Callback"| CR
+    CR -->|"8. Consensus Proof Delivery"| DON
+    DON -->|"9. Broadcasts Verification Transaction"| L2
 ```
 
 *Figure 1: The Quantum-Safe CRE Pipeline End-to-End Execution Flow. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from Ethereum constraints. The Chainlink Decentralized Oracle Network hooks into a Google Cloud Run Serverless adapter, automatically spawning huge Spot datacenters to map the SP1 mathematical matrices, dropping the computed payload natively into Cloud storage, and orchestrating the completion back into the decentralized Base Sepolia EVM broadcast layer seamlessly.*
