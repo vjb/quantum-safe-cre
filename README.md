@@ -45,7 +45,8 @@ graph LR
 ### Microservices
 1. **`1-client`**: A Rust client that generates a user intent and secures it with an ML-DSA lattice signature.
 2. **`2-sp1-coprocessor`**: A Dockerized RISC-V Zero-Knowledge VM that ingests the intent, runs the lattice verification, and outputs a cryptographic STARK proof.
-3. **`3-chainlink-cre`**: The local Chainlink node orchestrator (TypeScript) that triggers the prover, validates the STARK journal to prevent tampering, and achieves decentralized consensus.
+3. **`3-chainlink-cre`**: The Chainlink External Adapter orchestrator (TypeScript). 
+   - **Serverless Cloud Run Migration (Phase 3)**: The native server endpoint is deployed serverlessly via Google Cloud Run endpoints. It utilizes native TypeScript "baking" (Pre-compiled to ECMA modules) directly through Google Buildpacks to drastically minimize Node.js cold-start latencies. This boundary safely traps Chainlink's asynchronous HTTP hooks and instantly maps orchestration bounds natively to the Ephemeral GCP Spot Arrays at zero continuous holding cost.
 4. **`4-base-sepolia-vault`**: The L2 Settlement Layer. A Solidity smart contract deployed on Base Sepolia. It acts as the final settlement vault, utilizing Succinct's on-chain verifier to cheaply validate the STARK proof orchestrated by Chainlink, finalizing the post-quantum transaction on Ethereum.
    - **Vault Address (V2 w/ Replay Protection):** [`0x42f60ABfeB12EF53DB0c05983D5Da76386dE2fF8`](https://base-sepolia.blockscout.com/address/0x42f60abfeb12ef53db0c05983d5da76386de2ff8)
 
