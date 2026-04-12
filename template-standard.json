@@ -1,0 +1,62 @@
+{
+  "name": "sp1-gpu-prover-template-standard",
+  "properties": {
+    "canIpForward": false,
+    "disks": [
+      {
+        "autoDelete": true,
+        "boot": true,
+        "deviceName": "persistent-disk-0",
+        "index": 0,
+        "initializeParams": {
+          "diskSizeGb": "150",
+          "diskType": "pd-ssd",
+          "sourceImage": "projects/total-velocity-493022-f0/global/images/pqc-sp1-cached-image"
+        },
+        "kind": "compute#attachedDisk",
+        "mode": "READ_WRITE",
+        "type": "PERSISTENT"
+      }
+    ],
+    "guestAccelerators": [
+      {
+        "acceleratorCount": 1,
+        "acceleratorType": "nvidia-l4"
+      }
+    ],
+    "machineType": "g2-standard-4",
+    "metadata": {
+      "fingerprint": "Nqx6JNPUqcs=",
+      "kind": "compute#metadata"
+    },
+    "networkInterfaces": [
+      {
+        "accessConfigs": [
+          {
+            "kind": "compute#accessConfig",
+            "name": "external-nat",
+            "networkTier": "PREMIUM",
+            "type": "ONE_TO_ONE_NAT"
+          }
+        ],
+        "kind": "compute#networkInterface",
+        "name": "nic0",
+        "network": "https://www.googleapis.com/compute/v1/projects/total-velocity-493022-f0/global/networks/default"
+      }
+    ],
+    "serviceAccounts": [
+      {
+        "email": "default",
+        "scopes": [
+          "https://www.googleapis.com/auth/cloud-platform"
+        ]
+      }
+    ],
+    "scheduling": {
+      "provisioningModel": "STANDARD",
+      "preemptible": false,
+      "automaticRestart": true,
+      "onHostMaintenance": "TERMINATE"
+    }
+  }
+}

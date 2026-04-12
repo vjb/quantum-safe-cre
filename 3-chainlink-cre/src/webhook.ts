@@ -23,6 +23,11 @@ export function setupWebhookRoutes(app: Express) {
             const [fileContent] = await gcsFile.download();
             const parsedProof = JSON.parse(fileContent.toString('utf8'));
 
+            console.log(`[Webhook] Emitting structured physical matrix locally across filesystem boundaries! (../proof.json)`);
+            const fs = require('fs');
+            // Write it one directory up directly into the execution context so the scripts naturally trip the boundary!
+            fs.writeFileSync('../proof.json', fileContent);
+
             console.log(`[Webhook] Mathematical trace securely isolated. Re-injecting into Chainlink DON Core...`);
             await axios.post(`${nodeUrl}/v2/resume/${jobRunId}`, {
                 pending: false,

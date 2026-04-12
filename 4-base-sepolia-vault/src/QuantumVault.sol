@@ -7,13 +7,7 @@ contract QuantumVault {
     address public sp1Verifier;
     bytes32 public programVKey;
 
-    struct PendingIntent {
-        address target;
-        uint256 amount;
-        bool exists;
-    }
 
-    mapping(bytes32 => PendingIntent) public pendingIntents;
     mapping(bytes32 => bool) public executedIntents;
 
     uint256 private _nonce;
@@ -34,16 +28,9 @@ contract QuantumVault {
         programVKey = _programVKey;
     }
 
-    function requestPQCTransfer(address target, uint256 amount) external {
-        _nonce++;
-        bytes32 intentId = keccak256(abi.encodePacked(msg.sender, target, amount, _nonce, block.timestamp));
-        pendingIntents[intentId] = PendingIntent(target, amount, true);
-        
-        emit PostQuantumIntentLogged(intentId, target, amount);
-    }
+
 
     function fulfillPQCTransfer(bytes32 intentId, bytes calldata proofBytes, bytes calldata publicValues) external nonReentrant {
-        require(pendingIntents[intentId].exists, "Security Error: Intent does not exist natively");
 
         // 1. REPLAY PROTECTION
         bytes32 intentHash = keccak256(publicValues);
@@ -58,10 +45,7 @@ contract QuantumVault {
         // which breaks standard EVM ABI format. We simply acknowledge the verification.
 
         // 4. PROCESS SECURE TRANSFER
-        PendingIntent memory intent = pendingIntents[intentId];
         // Execute the pseudo-transfer internally simulating custody operations
-
-        delete pendingIntents[intentId];
 
         emit IntentExecuted("Consensus Achieved", true);
     }

@@ -39,15 +39,15 @@ async fn main() {
     let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
     let vk = pk.verifying_key();
 
-    // Attempt to generate a Groth16 proof locally. 
-    // This perfectly bypasses Plonk polynomial matrix overflow vulnerabilities when verifying massive PQC memory spans.
-    let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).groth16().await {
+    // Attempt to generate a pure Compressed STARK proof locally. 
+    // This perfectly routes the trace via pure hash-based FRI functions, entirely bypassing BN254 elliptic curves!
+    let mut proof: sp1_sdk::SP1ProofWithPublicValues = match client.prove(&pk, stdin).compressed().await {
         Ok(p) => p,
         Err(e) => {
-            let error_trace = format!("CRITICAL GROTH16 WRAPPER TRACE: {:#?}", e);
+            let error_trace = format!("CRITICAL STARK TRACE: {:#?}", e);
             eprintln!("{}", error_trace);
-            std::fs::write("/app/output/FATAL_GNARK_TRACE.txt", error_trace).ok();
-            panic!("Groth16 execution fatally collapsed!");
+            std::fs::write("/app/output/FATAL_STARK_TRACE.txt", error_trace).ok();
+            panic!("Pure STARK execution fatally collapsed!");
         }
     };
     

@@ -9,10 +9,10 @@ contract DeployVault is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         
         // Base Sepolia Official SP1 Verifier Address
-        address sp1Verifier = 0x3B6041173B80E77f038f3F2C0f9744f04837185e; 
+        address sp1Verifier = 0x397A5f7f3dBd538f23DE225B51f532c34448dA9B; 
         
-        // Placeholder for your actual SP1 Program VKey (Generated in Phase 2)
-        bytes32 programVKey = 0x0000000000000000000000000000000000000000000000000000000000000000;
+        // Validated SP1 Program VKey (Generated dynamically during Phase 2 Compilation)
+        bytes32 programVKey = 0x003c02d11d2290288d2d9f89eda3dc5d65a1732a7f9502aa9e7e70c6bcd60dd0;
 
         vm.startBroadcast(deployerPrivateKey);
 

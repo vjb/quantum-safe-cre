@@ -32,3 +32,21 @@ broadcast/
 # Editor
 .vscode/
 .idea/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+infrastructure/.terraform/
+infrastructure/.terraform.lock.hcl
+infrastructure/terraform.tfstate
+infrastructure/terraform.tfstate.backup
+infrastructure/function-source.zip
+
+# Ephemeral Local Payloads
+intent.json
+proof.json
+demo_debug.log
+sp1-node.log
+1-client/intent.json
