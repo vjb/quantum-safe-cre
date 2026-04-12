@@ -28,22 +28,45 @@ The End-State architecture targets STARK-native rollups (like StarkNet) to verif
 ### Architecture Flow
 
 ```mermaid
-graph TD
-    classDef client fill:#E0F7FA,stroke:#00BCD4,stroke-width:2px,color:#000000,rx:8px,ry:8px;
-    classDef zk fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000000,rx:8px,ry:8px;
-    classDef link fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px,color:#000000,rx:8px,ry:8px;
-    classDef base fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000000,rx:8px,ry:8px;
-    classDef gcp fill:#FFF8E1,stroke:#FFC107,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+sequenceDiagram
+    participant Client as 👤 Post-Quantum Client<br/>(ML-DSA Intent)
+    participant DON as 🔮 Chainlink CRE DON<br/>(Orchestrator)
+    participant CR as 🌩️ Google Cloud Run<br/>(Serverless Proxy)
+    participant GCP as 🖥️ GCP VM Array<br/>(n2-highmem-32 Spot)
+    participant Storage as 📦 GCS Bucket<br/>(Proof Artifacts)
+    participant SP1 as ⚙️ SP1 ZK-Coprocessor<br/>(RISC-V ZK-VM)
+    participant L2 as ⛓️ Base Sepolia Vault<br/>(EVM Smart Contract)
 
-    Client["1. Post-Quantum Client"]:::client -->|"Sign (ML-DSA)"| DON["2. Chainlink DON"]:::link
-    DON -->|"Job Webhook"| CR["3. Google Cloud Run (Serverless API)"]:::gcp
-    CR -->|"Provision Spot Template"| GCP["4. GCP n2-highmem-32 VM"]:::gcp
-    GCP -->|"Execute Prove & Drop Artifact"| SP1{"5. SP1 ZK-Coprocessor"}:::zk
-    SP1 -->|"Upload Proof Payload"| Storage[("GCS Bucket")]:::gcp
-    Storage -->|"Webhook Resume Callback"| GCP
-    GCP -->|"Finalize Trace"| CR
-    CR -->|"Provide Proof Payload"| DON
-    DON -->|"L2 EVM Broadcast"| L2[("6. Base Sepolia Vault")]:::base
+    Client->>DON: Submit Post-Quantum Intent (ML-DSA Signature)
+    DON->>CR: POST /prove (Trigger Async Job)
+    
+    Note over CR: Bypasses cold-start latency natively via Buildpacks<br/>Safely limits Node runtime execution costs
+
+    CR->>GCP: Provision Ephemeral ServerTemplate
+    GCP->>SP1: Inject Lattice Matrices & Intent Payload
+    
+    par Quantum-Safe ZK Proof Generation 🔒
+        SP1->>SP1: Bootstraps 256GB RAM footprint
+        SP1->>SP1: Validates ML-DSA Signature off-chain
+        SP1-->>GCP: Compresses trace into STARK proof.json
+    end
+
+    Note over GCP: Workload securely isolated.<br/>VM Self-Destructs recursively to eliminate holding constraints.
+
+    GCP->>Storage: Uploads proof.json
+    GCP->>CR: Fires Async Webhook Callback (Resume)
+    CR-->>DON: Transmit verified proof.json payload
+
+    Note over DON: Verifies computation hash consensus inside DON.<br/>Decentralized network approves pipeline trace.
+
+    alt STARK Math perfectly matches (APPROVED ✅)
+        DON->>L2: Broadcast Proof via Foundry CAST
+        L2->>L2: Execute Succinct Groth16 On-Chain Verifier
+        L2-->>Client: Transaction settled seamlessly (Zero EVM Bottleneck)
+    else Proof manipulated (BLOCKED 🛡️)
+        DON->>DON: Revert processing flow natively
+        Note over L2: Threat entirely blocked from hitting EVM.<br/>Zero Base Gas wasted by the end user!
+    end
 ```
 
 *Figure 1: The Quantum-Safe CRE Pipeline End-to-End Execution Flow. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from Ethereum constraints. The Chainlink Decentralized Oracle Network hooks into a Google Cloud Run Serverless adapter, automatically spawning huge Spot datacenters to map the SP1 mathematical matrices, dropping the computed payload natively into Cloud storage, and orchestrating the completion back into the decentralized Base Sepolia EVM broadcast layer seamlessly.*
