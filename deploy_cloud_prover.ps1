@@ -9,7 +9,7 @@ This script fully automates your remote SP1 architecture, preventing local OOM c
 
 $ErrorActionPreference = "Stop"
 
-$PROJECT_ID = "centering-helix-493023-f7" # Your currently authenticated GCP project
+$PROJECT_ID = "total-velocity-493022-f0" # Your currently authenticated GCP project (My Project 18209)
 $ZONE = "us-central1-a"
 $INSTANCE_NAME = "zkvm-prover-spot-instance"
 $MACHINE_TYPE = "n2-highmem-32" # 32 Cores / 256GB RAM. Retains identical memory footprint while cutting CPU utilization in half to bypass DataCenter Stockouts.
