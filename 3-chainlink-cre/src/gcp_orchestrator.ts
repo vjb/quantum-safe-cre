@@ -6,12 +6,13 @@ export async function spawnProverInstance(jobRunId: string, payload: any) {
     const project = process.env.GCP_PROJECT_ID || 'total-velocity-493022-f0';
     const webhook = process.env.ADAPTER_WEBHOOK_URL || 'http://example.com';
     const templatePath = process.env.GCP_INSTANCE_TEMPLATE_URL || 'global/instanceTemplates/sp1-prover-template';
+    const bucketName = process.env.GCS_BUCKET_NAME || 'chainlink-pqc-proofs';
     
     // Explicit Dynamic Fallback configuration traversing execution stockouts natively
     const zonePool = (process.env.GCP_ZONE_POOL || "us-central1-a").split(",");
     
     // Auto-hijack gcloud CLI tokens to maintain pipeline velocity without blocking for Application Default Credentials!
-    let client: compute.InstancesClient;
+    let client: any;
     let fallbackToken = "";
     try {
         const token = execSync('gcloud auth print-access-token', { encoding: 'utf-8' }).trim();
@@ -30,14 +31,19 @@ export async function spawnProverInstance(jobRunId: string, payload: any) {
         console.log(`[GCP Orchestrator] Attempting Spot Provisioning mapping Template in Zone: ${zone}...`);
 
             const bashScript = `#!/bin/bash
-# MOCK execution block mapping exact limits avoiding heavy Plonk compute times for the E2E integration constraint!
-mkdir -p /tmp
-cat << 'EOF' > /tmp/proof.json
-{
-  "proofBytes": "0xLIVE_GCP_VM_SUCCESS",
-  "publicValues": "0xLIVE_GCP_VM_SUCCESS"
-}
-EOF
+# LIVE EXECUTION BLOCK: Pulls the repository natively and calculates the massive Plonk equations securely over SP1 VM!
+if [ ! -d "quantum-safe-cre" ]; then
+  git clone https://github.com/vjb/quantum-safe-cre.git
+else
+  cd quantum-safe-cre && git fetch origin && git reset --hard origin/main && cd ..
+fi
+
+cd quantum-safe-cre
+chmod +x gcp_execute.sh
+bash gcp_execute.sh
+
+# Upload authentic mathematical proof directly into GCS Bucket boundaries cleanly!
+gsutil cp proof.json gs://${bucketName}/${jobRunId}/proof.json
 
 # Notify adapter (Callback Webhook execution directly to isolated NGrok tunnel)
 curl -X POST ${webhook}/webhook/gcp-complete -H "Content-Type: application/json" -d '{"jobRunId": "${jobRunId}"}' || echo "Webhook Failure!"
