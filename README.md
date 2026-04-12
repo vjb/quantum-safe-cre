@@ -28,19 +28,25 @@ The End-State architecture targets STARK-native rollups (like StarkNet) to verif
 ### Architecture Flow
 
 ```mermaid
-graph LR
+graph TD
     classDef client fill:#E0F7FA,stroke:#00BCD4,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef zk fill:#FCE4EC,stroke:#E91E63,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef link fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px,color:#000000,rx:8px,ry:8px;
     classDef base fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#000000,rx:8px,ry:8px;
+    classDef gcp fill:#FFF8E1,stroke:#FFC107,stroke-width:2px,color:#000000,rx:8px,ry:8px;
 
-    Client["1. Post-Quantum Client"]:::client -->|"Sign (ML-DSA)"| DON["3. Chainlink Node"]:::link
-    DON -->|"Execute Prove"| SP1{"2. ZK-Coprocessor"}:::zk
-    SP1 -->|"Return STARK Proof"| DON
-    DON -->|"L2 EVM Broadcast"| L2[("4. Base Sepolia Vault")]:::base
+    Client["1. Post-Quantum Client"]:::client -->|"Sign (ML-DSA)"| DON["2. Chainlink DON"]:::link
+    DON -->|"Job Webhook"| CR["3. Google Cloud Run (Serverless API)"]:::gcp
+    CR -->|"Provision Spot Template"| GCP["4. GCP n2-highmem-32 VM"]:::gcp
+    GCP -->|"Execute Prove & Drop Artifact"| SP1{"5. SP1 ZK-Coprocessor"}:::zk
+    SP1 -->|"Upload Proof Payload"| Storage[("GCS Bucket")]:::gcp
+    Storage -->|"Webhook Resume Callback"| GCP
+    GCP -->|"Finalize Trace"| CR
+    CR -->|"Provide Proof Payload"| DON
+    DON -->|"L2 EVM Broadcast"| L2[("6. Base Sepolia Vault")]:::base
 ```
 
-*Figure 1: The Quantum-Safe CRE Pipeline. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from the EVM constraint. The Chainlink Decentralized Oracle Network dynamically orchestrates an isolated SP1 zkVM, mathematically proving the signature off-chain and compressing the computation into a cheap, gas-efficient STARK proof.*
+*Figure 1: The Quantum-Safe CRE Pipeline End-to-End Execution Flow. Massive Post-Quantum lattice cryptography (ML-DSA) is decoupled from Ethereum constraints. The Chainlink Decentralized Oracle Network hooks into a Google Cloud Run Serverless adapter, automatically spawning huge Spot datacenters to map the SP1 mathematical matrices, dropping the computed payload natively into Cloud storage, and orchestrating the completion back into the decentralized Base Sepolia EVM broadcast layer seamlessly.*
 
 ### Microservices
 1. **`1-client`**: A Rust client that generates a user intent and secures it with an ML-DSA lattice signature.
