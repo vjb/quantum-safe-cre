@@ -80,12 +80,12 @@ gcloud compute scp "$($INSTANCE_NAME):quantum-safe-cre/proof.json" "./proof.json
     --strict-host-key-checking=no `
     --quiet
 
-# 5. Terminate Host (DISABLED)
-Write-Host "`n⚠️ [5/5] Skipping Terminate phase. The Google Cloud Instance ($INSTANCE_NAME) will remain RUNNING for faster debugging." -ForegroundColor Yellow
-# gcloud compute instances delete $INSTANCE_NAME `
-#     --project=$PROJECT_ID `
-#     --zone=$ZONE `
-#     --quiet
+# 5. Terminate Host (ENABLED)
+Write-Host "`n⚠️ [5/5] Terminating Ephemeral Host. The Google Cloud Instance ($INSTANCE_NAME) is being destroyed to securely enforce Zero Cost-Holding limits!" -ForegroundColor Yellow
+gcloud compute instances delete $INSTANCE_NAME `
+    --project=$PROJECT_ID `
+    --zone=$ZONE `
+    --quiet
 
 
 Write-Host "`n✅ Pipeline Exited Successfully! The 'proof.json' artifact is mathematically bound and native to your CWD." -ForegroundColor Green
