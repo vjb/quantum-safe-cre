@@ -6,6 +6,7 @@ Cargo.lock
 
 # Node.js
 node_modules/
+**/node_modules/
 dist/
 build/
 .npm/
@@ -28,6 +29,7 @@ broadcast/
 4-base-sepolia-vault/cache/
 4-base-sepolia-vault/out/
 4-base-sepolia-vault/broadcast/
+4-base-sepolia-vault/lib/
 
 # Editor
 .vscode/

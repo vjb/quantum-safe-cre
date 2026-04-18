@@ -7,8 +7,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@chainlink/cre-sdk": "file:./local-cre-sdk",
-    "@google-cloud/compute": "^6.9.0",
+    "@google-cloud/batch": "latest",
     "@google-cloud/storage": "^7.19.0",
     "axios": "^1.15.0",
     "cors": "^2.8.6",

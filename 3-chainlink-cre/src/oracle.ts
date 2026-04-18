@@ -1,5 +1,5 @@
 import express from 'express';
-import { spawnProverInstance } from './gcp_orchestrator';
+import { submitConfidentialBatchJob } from './batch_client';
 import { setupWebhookRoutes } from './webhook';
 
 export const app = express();
@@ -9,11 +9,18 @@ app.use(express.json());
 setupWebhookRoutes(app);
 
 app.post('/prove', (req, res) => {
-    const id = req.body.id;
-    const data = req.body.data;
+    // 1. Authorize via DON Confidential HTTP (Bearer HMAC)
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${process.env.HMAC_SECRET}`) {
+        return res.status(401).json({ error: "Unauthorized: Invalid Confidential Header." });
+    }
 
-    // Call synchronously but do not await. Execute the dynamic Spot provisioning mapping natively!
-    spawnProverInstance(id, data).catch((err: any) => {
+    const id = req.body.id;
+    const webhookUrl = process.env.WEBHOOK_URL || "http://localhost:8080/webhook";
+    const hmacSecret = process.env.HMAC_SECRET || "secure-mock-key";
+
+    // Call synchronously but do not await. Execute the dynamic Batch mapping natively!
+    submitConfidentialBatchJob(id, webhookUrl, hmacSecret).catch((err: any) => {
         console.error(`[Entrypoint] Fatal Orchestrator Spawning Block: ${err.message}`);
     });
 

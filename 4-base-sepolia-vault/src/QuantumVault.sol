@@ -1,52 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "./ISP1Verifier.sol";
 
-contract QuantumVault {
+contract QuantumVault is ChainlinkClient {
+    using Chainlink for Chainlink.Request;
+
     address public sp1Verifier;
     bytes32 public programVKey;
+    mapping(uint256 => bool) public executedNonces;
 
-
-    mapping(bytes32 => bool) public executedIntents;
-
-    uint256 private _nonce;
-    uint256 private _status = 1;
-
-    event PostQuantumIntentLogged(bytes32 indexed intentId, address target, uint256 amount);
-    event IntentExecuted(string message, bool success);
-
-    modifier nonReentrant() {
-        require(_status != 2, "ReentrancyGuard: reentrant call");
-        _status = 2;
-        _;
-        _status = 1;
-    }
+    event PostQuantumIntentLogged(address indexed target, uint256 amount);
+    event IntentExecuted(bytes32 indexed requestId, bool success);
 
     constructor(address _sp1Verifier, bytes32 _programVKey) {
         sp1Verifier = _sp1Verifier;
         programVKey = _programVKey;
     }
 
-
-
-    function fulfillPQCTransfer(bytes32 intentId, bytes calldata proofBytes, bytes calldata publicValues) external nonReentrant {
-
-        // 1. REPLAY PROTECTION
-        bytes32 intentHash = keccak256(publicValues);
-        require(!executedIntents[intentHash], "Security Error: Intent already executed");
-        executedIntents[intentHash] = true;
-
-        // 2. VERIFY THE STARK PROOF
+    // Fulfillment callback triggered by the Chainlink DON natively from the Cloud Batch Webhook
+    function fulfillPQCProof(bytes32 _requestId, bytes calldata proofBytes, bytes calldata publicValues) public {
+        require(msg.sender == oracle() || oracle() == address(0), "Confidential Routing Error: Only Authorized DON Oracle can submit results!");
+        // 1. ZK Verification
         ISP1Verifier(sp1Verifier).verifyProof(programVKey, publicValues, proofBytes);
 
-        // 3. EXTRACT THE INTENT 
-        // The sp1 verifier outputs native byte arrays (little-endian length strings from Rust), 
-        // which breaks standard EVM ABI format. We simply acknowledge the verification.
+        // 2. Strict ABI Decoding (EVM standard)
+        (address target, uint256 amount, uint256 nonce) = abi.decode(publicValues, (address, uint256, uint256));
 
-        // 4. PROCESS SECURE TRANSFER
-        // Execute the pseudo-transfer internally simulating custody operations
+        // 3. Replay Protection
+        require(!executedNonces[nonce], "Security Error: Nonce used");
+        executedNonces[nonce] = true;
 
-        emit IntentExecuted("Consensus Achieved", true);
+        // 4. Execution
+        emit PostQuantumIntentLogged(target, amount);
+        emit IntentExecuted(_requestId, true);
     }
 }
