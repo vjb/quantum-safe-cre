@@ -12,8 +12,9 @@ fn main() {
     info!("Starting 1-client Intent Generator...");
 
     let signer = IntentSigner::new();
-    let message = "Transfer 10 USDC";
-    
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+    let message = format!("Transfer 10 USDC - Nonce {}", now);
+    let message = message.as_str();
     let signature_bytes = signer.sign_intent(message.as_bytes());
     let signature_hex = hex::encode(signature_bytes);
     

@@ -1,0 +1,53 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "container": {
+              "imageUri": "us-east1-docker.pkg.dev/strange-radius-493714-j0/quantum-safe-cre-repo/sp1-prover:latest",
+              "entrypoint": "/bin/sh",
+              "commands": [
+                "-c",
+                "zkvm-script && gsutil cp /app/2-sp1-coprocessor/script/proof.json gs://quantum-safe-cre-proofs/proof.json"
+              ]
+            }
+          }
+        ],
+        "computeResource": {
+          "cpuMilli": 16000,
+          "memoryMib": 64000
+        }
+      },
+      "taskCount": 1
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "g2-standard-16",
+          "provisioningModel": "STANDARD",
+          "accelerators": [
+            {
+              "type": "nvidia-l4",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "location": {
+      "allowedLocations": [
+        "regions/us-central1",
+        "regions/us-east1",
+        "regions/us-east4",
+        "regions/us-west1",
+        "regions/europe-west4"
+      ]
+    }
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}
