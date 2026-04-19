@@ -71,7 +71,7 @@ The mechanical reality of the Omni-Chain Custody Protocol has been rigorously te
 
 ### Deployed Vault Contracts
 * **Primary Hub (Base Sepolia):** [`0xBA905DA3D4b84c92A92958EbbeAE60D489c9f356`](https://sepolia.basescan.org/address/0xBA905DA3D4b84c92A92958EbbeAE60D489c9f356)
-* **Replica Spoke (Arbitrum Sepolia):** [`0xf85dF7CE67889266224171915e6149471cAfF927`](https://sepolia.arbiscan.io/address/0xf85dF7CE67889266224171915e6149471cAfF927)
+* **Replica Spoke (Arbitrum Sepolia Simulator):** [`0xf85dF7CE67889266224171915e6149471cAfF927`](https://sepolia.basescan.org/address/0xf85dF7CE67889266224171915e6149471cAfF927)
 
 ### Live CCIP Settlement Hashes
 The successful submission of the STARK Data Availability anchor and the subsequent Chainlink CCIP cross-chain settlements were executed successfully and mathematically verified on-chain.
