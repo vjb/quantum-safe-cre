@@ -4,15 +4,15 @@ pragma solidity ^0.8.20;
 import "forge-std/Script.sol";
 import "../src/QuantumHomeVault.sol";
 import "../src/QuantumSpokeVault.sol";
-import "../src/MockSP1Verifier.sol";
+import "../src/QuantumEigenDAVerifier.sol";
 
 contract DeployHubAndSpoke is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         
         // Base Sepolia Deployments
-        address sp1Verifier = 0x397A5f7f3dBd538f23DE225B51f532c34448dA9B; 
-        bytes32 programVKey = 0x00e7689ca01eede8fff671e32a9fd4b0b94424ce81b5ccd573f2a30139f32013;
+
+        bytes32 programVKey = 0x0022bde2497e7e25206f6333ced84474e4c05ca2a757d80b902b0f8d2f5faf0b;
         address baseRouter = 0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93;
         address baseLink = 0xE4aB69C077896252FAFBD49EFD26B5D171A32410;
 
@@ -21,15 +21,15 @@ contract DeployHubAndSpoke is Script {
 
         // Deploy Home Vault to Base Sepolia
         vm.startBroadcast(deployerPrivateKey);
-        MockSP1Verifier mockVerifier = new MockSP1Verifier();
-        QuantumHomeVault homeVault = new QuantumHomeVault(address(mockVerifier), programVKey, baseRouter, baseLink);
+        QuantumEigenDAVerifier eigenVerifier = new QuantumEigenDAVerifier();
+        QuantumHomeVault homeVault = new QuantumHomeVault(address(eigenVerifier), programVKey, baseRouter, baseLink);
         vm.stopBroadcast();
         console.log("QuantumHomeVault deployed to Base Sepolia at:", address(homeVault));
 
         // Deploy Spoke Vault to Arbitrum Sepolia
-        vm.startBroadcast(deployerPrivateKey);
-        QuantumSpokeVault spokeVault = new QuantumSpokeVault(arbRouter);
-        vm.stopBroadcast();
-        console.log("QuantumSpokeVault deployed to Arbitrum Sepolia at:", address(spokeVault));
+        // vm.startBroadcast(deployerPrivateKey);
+        // QuantumSpokeVault spokeVault = new QuantumSpokeVault(arbRouter);
+        // vm.stopBroadcast();
+        // console.log("QuantumSpokeVault deployed to Arbitrum Sepolia at:", address(spokeVault));
     }
 }

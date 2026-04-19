@@ -46,7 +46,7 @@ pub fn main() {
     let nonce_val: u128 = nonce_str.parse().unwrap_or(42);
 
     let intent = PqcIntent {
-        target: "0xf85dF7CE67889266224171915e6149471cAfF927".parse().unwrap(),
+        target: "0x5333c7525773dF05BF190d8A0B5922DB6c88585C".parse().unwrap(),
         amount: U256::from(amount_val * 1_000_000), // Mapping 6-decimal integer arrays (USDC)
         nonce: U256::from(nonce_val),
         destinationChainSelector: 3478487238524512106, // Arbitrum Sepolia CCIP

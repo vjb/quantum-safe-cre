@@ -39,6 +39,9 @@ async fn main() {
     // Generate the proving and verifying keys
     let pk = client.setup(sp1_sdk::Elf::Static(ELF)).await.expect("Failed to setup SP1 proving keys.");
     let vk = pk.verifying_key();
+    
+    // Explicitly print the vkey so we can capture it during orchestration
+    info!("PROGRAM_VKEY_EXPORT: {}", vk.bytes32().to_string());
 
     // Attempt to generate a pure Compressed STARK proof locally. 
     // This perfectly routes the trace via pure hash-based FRI functions, entirely bypassing BN254 elliptic curves!

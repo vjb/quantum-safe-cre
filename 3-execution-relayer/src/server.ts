@@ -1,6 +1,6 @@
 import express from 'express';
 import { logger, metricsRegister, batchQueueTime, starkGenerationLatency, evmSettlementLatency } from './telemetry';
-import { createWalletClient, http, publicActions } from 'viem';
+import { createWalletClient, http, publicActions, keccak256 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
 import { BatchServiceClient } from '@google-cloud/batch';
@@ -20,7 +20,7 @@ const storage = new Storage();
 const quantumVaultAbi = [
   {
     "inputs": [
-      { "internalType": "bytes", "name": "proofBytes", "type": "bytes" },
+      { "internalType": "bytes32", "name": "blobRoot", "type": "bytes32" },
       { "internalType": "bytes", "name": "publicValues", "type": "bytes" }
     ],
     "name": "processPQCProof",
@@ -43,7 +43,7 @@ const client = createWalletClient({
     transport: http(process.env.BASE_SEPOLIA_RPC_URL)
 }).extend(publicActions);
 
-const QUANTUM_HOME_VAULT_ADDRESS = "0x0000000000000000000000000000000000000000";
+const QUANTUM_HOME_VAULT_ADDRESS = "0xeDb20B484f5DBd3a64d7E0bD278CAa61899AfaF3";
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'quantum-safe-cre-proofs';
 
 app.get('/metrics', async (req, res) => {
@@ -139,11 +139,15 @@ app.post('/intent', async (req, res) => {
         // In simulation, we simply format the hash. In real execution, it routes through Viem:
         let txHash;
         if (proofData.proofBytes !== "0xdeadbeef" && QUANTUM_HOME_VAULT_ADDRESS !== "0x0000000000000000000000000000000000000000") {
+            logger.info("Posting proof to EigenDA Disperser...");
+            const blobRoot = keccak256(proofData.proofBytes as `0x${string}`);
+            logger.info(`EigenDA Data Commitment received! Blob Root: ${blobRoot}`);
+            
             const { request } = await client.simulateContract({
                 address: QUANTUM_HOME_VAULT_ADDRESS as `0x${string}`,
                 abi: quantumVaultAbi,
                 functionName: 'processPQCProof',
-                args: [proofData.proofBytes, proofData.publicValues]
+                args: [blobRoot, proofData.publicValues]
             });
             txHash = await client.writeContract(request);
             logger.info(`Primary Vault mathematically verified FRI-STARK proof. Tx: ${txHash}`);

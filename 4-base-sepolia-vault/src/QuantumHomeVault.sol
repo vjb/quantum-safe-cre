@@ -3,7 +3,9 @@ pragma solidity ^0.8.20;
 
 import {IRouterClient} from "@chainlink/contracts-ccip/contracts/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
-import {ISP1Verifier} from "./ISP1Verifier.sol";
+interface IEigenDAVerifier {
+    function verifyDACommitment(bytes32 programVKey, bytes calldata publicValues, bytes32 blobRoot) external returns (bool);
+}
 
 interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
@@ -11,7 +13,7 @@ interface IERC20 {
 }
 
 contract QuantumHomeVault {
-    address public sp1Verifier;
+    address public eigenDAVerifier;
     bytes32 public programVKey;
     mapping(uint256 => bool) public executedNonces;
 
@@ -21,16 +23,16 @@ contract QuantumHomeVault {
     event PostQuantumIntentLogged(address indexed target, uint256 amount);
     event MessageSent(bytes32 indexed messageId, uint64 indexed destinationChainSelector, address receiver, bytes data);
 
-    constructor(address _sp1Verifier, bytes32 _programVKey, address _router, address _linkToken) {
-        sp1Verifier = _sp1Verifier;
+    constructor(address _eigenDAVerifier, bytes32 _programVKey, address _router, address _linkToken) {
+        eigenDAVerifier = _eigenDAVerifier;
         programVKey = _programVKey;
         router = IRouterClient(_router);
         linkToken = IERC20(_linkToken);
     }
 
-    function processPQCProof(bytes calldata proofBytes, bytes calldata publicValues) external {
-        // 1. Logic Test: ZK Verification
-        ISP1Verifier(sp1Verifier).verifyProof(programVKey, publicValues, proofBytes);
+    function processPQCProof(bytes32 blobRoot, bytes calldata publicValues) external {
+        // 1. Logic Test: EigenDA Data Availability Verification
+        IEigenDAVerifier(eigenDAVerifier).verifyDACommitment(programVKey, publicValues, blobRoot);
 
         // 2. Strict ABI Decoding (EVM standard)
         (address target, uint256 amount, uint256 nonce, uint64 destinationChainSelector) = abi.decode(publicValues, (address, uint256, uint256, uint64));
