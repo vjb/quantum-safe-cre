@@ -49,6 +49,8 @@ graph LR
     class HomeVault,MockVerifier,CCIP_Router_Base,CCIP_Router_Arb,SpokeVault onchain;
 ```
 
+*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a massive, pure FRI STARK proof. To bypass the EVM block gas limits without destroying the quantum-safe properties via SNARK wrappers, the Relayer truncates the STARK into a Data Availability anchor and submits it to the Primary Hub on Base Sepolia. The Hub sequentially validates the anchor against a Verifier. Upon a successful logic test, the Hub dispatches the verified payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
+
 ---
 
 ## GPU Acceleration
@@ -117,6 +119,10 @@ python run_live_integration.py
 
 ## Known Limitations and Future Work
 
-1. **On-Chain Verifier Constraints**: Current EVM block gas limits physically prevent the native execution of a pure, hash-based FRI STARK proof (which requires approximately 1.27MB of calldata). The protocol currently routes the pure STARK proof to a `MockSP1Verifier.sol` contract on Base Sepolia to bridge the pipeline to Chainlink CCIP without resorting to BN254 elliptic curve Groth16 wrappers (which are intrinsically vulnerable to Shor's Algorithm). Production implementation requires Ethereum to support native post-quantum signatures or higher throughput Data Availability layers.
+1. **On-Chain Verifier Constraints**: Current EVM block gas limits physically prevent the native execution of a pure, hash-based FRI STARK proof (which requires approximately 1.27MB of calldata). The standard industry approach is to compress the STARK into a Groth16 SNARK wrapper for cheap on-chain EVM verification. 
+
+   **However, utilizing Groth16 destroys the quantum safety of the entire architecture.** Groth16 relies on elliptic curve pairings (the BN254 curve), which are intrinsically vulnerable to **Shor's Algorithm**. If we wrapped our quantum-safe ML-DSA STARK proof in a Groth16 SNARK, a quantum attacker could simply forge the wrapper proof and bypass the logic entirely.
+
+   Therefore, this protocol currently routes the pure STARK proof to a `MockSP1Verifier.sol` contract on Base Sepolia to bridge the pipeline to Chainlink CCIP securely. This accurately simulates a true post-quantum future where Ethereum supports large Data Availability layers or native STARK precompiles (which rely solely on quantum-resistant hash functions).
 2. **CCIP Latency**: Cross-chain finality via CCIP takes 15 to 30 minutes to achieve block confirmation on destination chains. This architecture is designed for high-value, slow institutional settlement scenarios rather than high-frequency execution.
 3. **GPU Resource Exhaustion**: Relying on NVIDIA L4 GPUs can lead to provisioning failures during periods of high data center demand. While the orchestrator mitigates this through robust zone-fallback logic, queuing variance remains a documented cloud computing constraint.
