@@ -1,16 +1,16 @@
 # Institutional Omni-Chain Custody Protocol
 
-Welcome to the **Quantum-Safe Omni-Chain Custody Protocol**, a next-generation institutional architecture designed to seamlessly settle post-quantum signatures across disparate blockchain ecosystems without sacrificing security or incurring prohibitive EVM gas costs. 
+Welcome to the **Quantum-Safe Omni-Chain Custody Protocol**, an architecture designed to settle post-quantum signatures across blockchain ecosystems without incurring EVM gas limits. 
 
-This repository contains the foundational infrastructure necessary to orchestrate an end-to-end ZK-STARK proof generation pipeline utilizing the **SP1 Zero-Knowledge Virtual Machine**, highly optimized **NVIDIA L4 GPU** cloud computing, **EigenDA Data Availability**, and **Chainlink CCIP** cross-chain message routing.
+This repository contains the infrastructure necessary to orchestrate a ZK-STARK proof generation pipeline utilizing the **SP1 Zero-Knowledge Virtual Machine**, **NVIDIA L4 GPU** cloud computing, **EigenDA Data Availability**, and **Chainlink CCIP** cross-chain message routing.
 
 ---
 
 ## Architecture Specifications
 
-The workflow routes a cryptographically signed ML-DSA intent through a dynamic off-chain distributed prover to optimize compute costs and bypass the physical EVM block gas limit. 
+The workflow routes a cryptographically signed ML-DSA intent through an off-chain distributed prover to optimize compute costs and bypass the EVM block gas limit. 
 
-To eliminate the quantum vulnerabilities of standard Groth16 SNARK wrappers, the pure STARK proof is securely anchored to **EigenDA**, a massive Data Availability layer. The EigenDA Data Commitment (`blobRoot`) is submitted to the primary chain via `QuantumHomeVault.sol` which executes the ZK logic test. If the test passes, cross-chain messaging via Chainlink CCIP bridges the verified payload to a replica `QuantumSpokeVault.sol` on the target chain.
+To eliminate the quantum vulnerabilities of standard Groth16 SNARK wrappers, the pure STARK proof is anchored to **EigenDA**, a Data Availability layer. The EigenDA Data Commitment (`blobRoot`) is submitted to the primary chain via `QuantumHomeVault.sol` which executes the ZK logic test. If the test passes, cross-chain messaging via Chainlink CCIP bridges the verified payload to a replica `QuantumSpokeVault.sol` on the target chain.
 
 ### The Omni-Chain Settlement Flow
 
@@ -51,21 +51,21 @@ graph LR
     class HomeVault,EigenVerifier,CCIP_Router_Base,CCIP_Router_Arb,SpokeVault onchain;
 ```
 
-*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a massive, pure FRI STARK proof. The Relayer disperses the payload to EigenDA and submits the blob root to the Primary Hub on Base Sepolia. Upon a successful verification, the Hub dispatches the payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
+*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a pure FRI STARK proof. The Relayer disperses the payload to EigenDA and submits the blob root to the Primary Hub on Base Sepolia. Upon a successful verification, the Hub dispatches the payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
 
 ---
 
 ## GPU Acceleration & Automatic Failover
 
-The generation of pure FRI STARK proofs is an incredibly computationally intensive process. To resolve this, we engineered a custom cloud infrastructure implementation that physically bakes the NVIDIA CUDA runtime directly into the OS image via our orchestration scripts.
+The generation of pure FRI STARK proofs is a computationally intensive process. To resolve this, we engineered a custom cloud infrastructure implementation that physically bakes the NVIDIA CUDA runtime directly into the OS image via our orchestration scripts.
 
-The dynamic orchestrator (`run_live_integration.py`) intelligently mitigates L4 GPU stockouts by physically iterating through all United States GCP availability zones (`us-central1` and `us-east`), ensuring 100% uptime regardless of physical hardware contention.
+The dynamic orchestrator (`run_live_integration.py`) mitigates L4 GPU stockouts by physically iterating through all United States GCP availability zones (`us-central1` and `us-east`), ensuring uptime regardless of physical hardware contention.
 
 ---
 
 ## Protocol Validation & Proof of Execution
 
-The mechanical reality of the Omni-Chain Custody Protocol has been rigorously tested across live public networks. Below are the physical execution artifacts proving the deterministic nature of the quantum-safe routing and CCIP bridges.
+The protocol has been tested across live public networks. Below are the physical execution artifacts proving the deterministic nature of the quantum-safe routing and CCIP bridges.
 
 ### Deployed Vault Contracts
 * **Primary Hub (Base Sepolia):** [`0xeDb20B484f5DBd3a64d7E0bD278CAa61899AfaF3`](https://sepolia.basescan.org/address/0xeDb20B484f5DBd3a64d7E0bD278CAa61899AfaF3)
@@ -78,7 +78,7 @@ The successful submission of the STARK Data Availability anchor and the subseque
 * **CCIP Cross-Chain Route Tracker:** [`0xebd97a6795998f25cebe0823163757dc2d39ebe52573b0c502b7cac5f01bd15b`](https://ccip.chain.link/tx/0xebd97a6795998f25cebe0823163757dc2d39ebe52573b0c502b7cac5f01bd15b)
 
 ### Institutional Pipeline Telemetry
-The following is an unedited extraction from our Master Execution execution flow, tracking the generation, automated hardware failover, and exact routing into Chainlink CCIP.
+The following is an unedited extraction from our primary execution flow, tracking the generation, automated hardware failover, and exact routing into Chainlink CCIP.
 
 ```bash
 2026-04-18 21:42:29 [INFO] Commencing live integration pipeline (Accelerated Machine Image Edition).
@@ -113,31 +113,32 @@ The following is an unedited extraction from our Master Execution execution flow
 
 This repository has been fully orchestrated for automatic execution. No Docker Compose layers or complex Terraform applies are required.
 
-### 1. Environment Configuration
-Duplicate the `.env.example` file and configure your credentials.
+### Step 0: Environment Configuration
+Duplicate the `.env.example` file into a local `.env` file and populate all variables prior to running any installation or execution commands.
 ```bash
 cp .env.example .env
 ```
 Ensure you have hydrated the `4-base-sepolia-vault/.env` with your EVM `PRIVATE_KEY` for the relayer execution.
 
-### 2. Bake the L4 GPU Image
+### 1. Bake the L4 GPU Image
 Execute the image baker to pull the SP1 ZKVM and NVIDIA dependencies and stamp them into a permanent Google Cloud Machine Image.
 ```bash
 python bake_image.py
 ```
 
-### 3. Run the Live Orchestrator
-Initiate the flagship execution pipeline. This Python script generates the ML-DSA intent, provisions the `g2-standard-16` virtual machine, fetches the pure STARK proof, and triggers the Viem execution relayer to route the Chainlink CCIP transaction to Base Sepolia.
+### 2. Run the Live Orchestrator
+Initiate the execution pipeline. This Python script generates the ML-DSA intent, provisions the `g2-standard-16` virtual machine, fetches the pure STARK proof, and triggers the Viem execution relayer to route the Chainlink CCIP transaction to Base Sepolia.
 ```bash
 python run_live_integration.py
 ```
 
 ---
 
-## Institutional Roadmap
+## Known Limitations & Future Work
 
-### 1. Native STARK Rollup Deployment (Starknet)
-To completely bypass EVM boundaries natively, the `QuantumHomeVault` will be rewritten in Cairo and deployed as a parallel hub on Starknet. Starknet natively verifies FRI-STARKs without EVM verification bottlenecks. Deploying the primary hub on Starknet will allow us to drop the EVM limitations entirely, achieving true end-to-end mathematical verification alongside the EigenDA implementations.
+While this implementation orchestrates a Quantum-Safe intent through CCIP, our production roadmap includes architectural upgrades to achieve absolute mathematical finality:
 
-### 2. Chainlink DON Upgrades
-Currently, Chainlink's Decentralized Oracle Network relies on Elliptic Curve Pairings (BLS Threshold Signatures). For a 100% PQC network, Chainlink nodes will need to migrate to Lattice-Based Threshold Protocols to preserve post-quantum security across the transport layer itself.
+1. **Native STARK Rollup Deployment (Starknet)**: To bypass EVM boundaries natively, the `QuantumHomeVault` will be rewritten in Cairo and deployed as a parallel hub on Starknet. Starknet natively verifies FRI-STARKs without EVM verification bottlenecks. Deploying the primary hub on Starknet will allow us to drop the EVM limitations, achieving end-to-end mathematical verification alongside the EigenDA implementations.
+2. **Chainlink DON Upgrades**: Currently, Chainlink's Decentralized Oracle Network relies on Elliptic Curve Pairings (BLS Threshold Signatures). For a 100% PQC network, Chainlink nodes will need to migrate to Lattice-Based Threshold Protocols to preserve post-quantum security across the transport layer itself.
+3. **Execution Relayer Key Management**: Currently, the relayer relies on a local private key injected via environment variables. Production requires a secure key management service (KMS) or hardware security module (HSM) for automated transaction signing.
+4. **CCIP Latency**: Cross-chain finality via CCIP takes 15 to 30 minutes to achieve block confirmation on destination chains. This architecture is designed for high-value, slow institutional settlement scenarios rather than high-frequency execution.
