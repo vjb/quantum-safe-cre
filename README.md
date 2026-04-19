@@ -1,6 +1,6 @@
-# Institutional Omni-Chain Custody Protocol
+# Institutional Cross-Chain Custody Protocol
 
-Welcome to the **Quantum-Safe Omni-Chain Custody Protocol**, an architecture designed to settle post-quantum signatures across blockchain ecosystems without incurring EVM gas limits. 
+The **Quantum-Safe Cross-Chain Custody Protocol** is a routing architecture that verifies and settles post-quantum (ML-DSA) signatures across EVM networks without exceeding physical block gas limits. 
 
 This repository contains the infrastructure necessary to orchestrate a ZK-STARK proof generation pipeline utilizing the **SP1 Zero-Knowledge Virtual Machine**, **NVIDIA L4 GPU** cloud computing, **EigenDA Data Availability**, and **Chainlink CCIP** cross-chain message routing.
 
@@ -12,7 +12,7 @@ The workflow routes a cryptographically signed ML-DSA intent through an off-chai
 
 To eliminate the quantum vulnerabilities of standard Groth16 SNARK wrappers, the pure STARK proof is anchored to **EigenDA**, a Data Availability layer. The EigenDA Data Commitment (`blobRoot`) is submitted to the primary chain via `QuantumHomeVault.sol` which executes the ZK logic test. If the test passes, cross-chain messaging via Chainlink CCIP bridges the verified payload to a replica `QuantumSpokeVault.sol` on the target chain.
 
-### The Omni-Chain Settlement Flow
+### The Cross-Chain Settlement Flow
 
 ```mermaid
 graph LR
@@ -51,7 +51,7 @@ graph LR
     class HomeVault,EigenVerifier,CCIP_Router_Base,CCIP_Router_Arb,SpokeVault onchain;
 ```
 
-*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a pure FRI STARK proof. The Relayer disperses the payload to EigenDA and submits the blob root to the Primary Hub on Base Sepolia. Upon a successful verification, the Hub dispatches the payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
+*Figure 1: The Cross-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a pure FRI STARK proof. The Relayer disperses the payload to EigenDA and submits the blob root to the Primary Hub on Base Sepolia. Upon a successful verification, the Hub dispatches the payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
 
 ---
 

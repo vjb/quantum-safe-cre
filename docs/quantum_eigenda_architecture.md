@@ -1,4 +1,4 @@
-# The Post-Quantum Omni-Chain Architecture
+# The Post-Quantum Cross-Chain Architecture
 
 The core challenge of post-quantum cryptography on EVM-compatible networks is the sheer size of the data. Zero-Knowledge STARKs (Scalable Transparent Arguments of Knowledge) derive their security purely from collision-resistant hash functions, making them inherently post-quantum resilient. However, pure FRI-STARK proofs feature massive data footprints (averaging 1.27MB). Submitting and verifying a payload of this size natively on Ethereum L1 or L2 is impossible due to strict block gas limits.
 
@@ -19,7 +19,7 @@ Instead of forcing the 1.27MB STARK proof into an EVM transaction via a Groth16 
 
 EigenDA specializes in cheap, massive data availability. Upon receiving the proof, it generates a mathematical Data Commitment (a `blobRoot` Merkle Root).
 
-## 4. Chainlink CCIP Omni-Chain Settlement
+## 4. Chainlink CCIP Cross-Chain Settlement
 The Relayer submits only the 32-byte `blobRoot` to the `QuantumHomeVault.sol` on Base Sepolia. The Vault utilizes the `QuantumEigenDAVerifier` to assert the mathematical execution trace. 
 
 Because the data footprint is mathematically verified via the DA layer, the Hub successfully dispatches the authorized message to the Chainlink CCIP Router. The Decentralized Oracle Network manages consensus, securely executing the final post-quantum settlement on the replica `QuantumSpokeVault.sol` on Arbitrum Sepolia!
