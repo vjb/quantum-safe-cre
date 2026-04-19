@@ -36,8 +36,8 @@ graph LR
     Client -->|"JSON Payload"| GCP
     GCP -->|"Generates Pure STARK\n(~1.27MB)"| Relayer
     Relayer -->|"Submits DA Anchor\n(32 Bytes)"| HomeVault
-    HomeVault <-->|"Validates Reference"| MockVerifier
-    HomeVault -->|"Dispatches Message"| CCIP_Router_Base
+    HomeVault -->|"Validates Reference"| MockVerifier
+    MockVerifier -->|"If Valid, Dispatches Message"| CCIP_Router_Base
     CCIP_Router_Base -.->|"Cross-Chain\nSettlement"| CCIP_Router_Arb
     CCIP_Router_Arb -->|"Executes Intent"| SpokeVault
     
