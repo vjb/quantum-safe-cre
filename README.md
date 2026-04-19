@@ -6,7 +6,7 @@ This repository contains the foundational infrastructure necessary to orchestrat
 
 ---
 
-## 🏗️ Architecture Specifications
+## Architecture Specifications
 
 The workflow routes a cryptographically signed ML-DSA intent through a dynamic off-chain distributed prover to optimize compute costs and bypass the physical EVM block gas limit. Upon generation, the SP1 execution footprint is securely ported to the primary chain via `QuantumHomeVault.sol` which executes the ZK logic test. If the test passes, cross-chain messaging via Chainlink CCIP bridges the verified payload to a replica `QuantumSpokeVault.sol` on the target chain.
 
@@ -42,8 +42,8 @@ graph LR
     CCIP_Router_Arb -->|"Executes Intent"| SpokeVault
     
     %% Styling
-    classDef execution fill:#0e1111,stroke:#333,stroke-width:2px,color:#fff;
-    classDef onchain fill:#1a2b3c,stroke:#4a90e2,stroke-width:2px,color:#fff;
+    classDef execution fill:#f8f9fa,stroke:#ced4da,stroke-width:2px,color:#212529,rx:6px,ry:6px;
+    classDef onchain fill:#e7f5ff,stroke:#74c0fc,stroke-width:2px,color:#0b7285,rx:6px,ry:6px;
     
     class Client,GCP,Relayer execution;
     class HomeVault,MockVerifier,CCIP_Router_Base,CCIP_Router_Arb,SpokeVault onchain;
@@ -51,20 +51,19 @@ graph LR
 
 ---
 
-## ⚡ The GPU Acceleration Miracle
+## GPU Acceleration
 
-The generation of pure FRI STARK proofs is an incredibly computationally intensive process that often silently starves on CPU threads. In early benchmarks, proving the ML-DSA signature via CPU fallback took approximately **25 minutes**.
+The generation of pure FRI STARK proofs is an incredibly computationally intensive process. In early benchmarks, proving the ML-DSA signature via CPU fallback took approximately 25 minutes.
 
-To resolve this, we engineered a custom cloud infrastructure implementation that physically bakes the **NVIDIA CUDA runtime (`nvidia/cuda:12.2.2-runtime-ubuntu22.04`)** and the Google Cloud Ops Agent directly into the OS image via our orchestration scripts.
+To resolve this, we engineered a custom cloud infrastructure implementation that physically bakes the NVIDIA CUDA runtime (`nvidia/cuda:12.2.2-runtime-ubuntu22.04`) and the Google Cloud Ops Agent directly into the OS image via our orchestration scripts.
 
-By transitioning to this baked-in architecture, the dynamic orchestrator eliminates Docker network pulls and enables instant, pure bare-metal L4 GPU acceleration. The result is a massive performance breakthrough: **STARK proof generation time plummeted from 25 minutes down to an astonishing 62.79 seconds.**
+By transitioning to this baked-in architecture, the dynamic orchestrator eliminates Docker network pulls and enables bare-metal L4 GPU acceleration. The result is a significant performance improvement: STARK proof generation time was reduced from 25 minutes down to 62.79 seconds.
 
-> [!TIP]
-> The dynamic orchestrator (`run_live_integration.py`) intelligently mitigates L4 GPU stockouts by physically iterating through all 10 United States GCP availability zones (`us-central1-a` to `us-east1-d`), ensuring 100% uptime regardless of physical hardware contention.
+Note: The dynamic orchestrator (`run_live_integration.py`) intelligently mitigates L4 GPU stockouts by physically iterating through all 10 United States GCP availability zones (`us-central1-a` to `us-east1-d`), ensuring 100% uptime regardless of physical hardware contention.
 
 ---
 
-## 🌐 Protocol Validation & Proof of Execution
+## Protocol Validation & Proof of Execution
 
 The mechanical reality of the Omni-Chain Custody Protocol has been rigorously tested across live public networks. Below are the physical execution artifacts proving the deterministic nature of the quantum-safe routing and CCIP bridges.
 
@@ -91,7 +90,7 @@ The following is an unedited extraction from the raw Google Compute Engine logs,
 
 ---
 
-## 🛠️ Step-by-Step Execution Guide
+## Step-by-Step Execution Guide
 
 This repository has been fully orchestrated for automatic execution. No Docker Compose layers or complex Terraform applies are required.
 
@@ -116,7 +115,7 @@ python run_live_integration.py
 
 ---
 
-## 🚨 Known Limitations and Future Work
+## Known Limitations and Future Work
 
 1. **On-Chain Verifier Constraints**: Current EVM block gas limits physically prevent the native execution of a pure, hash-based FRI STARK proof (which requires approximately 1.27MB of calldata). The protocol currently routes the pure STARK proof to a `MockSP1Verifier.sol` contract on Base Sepolia to bridge the pipeline to Chainlink CCIP without resorting to BN254 elliptic curve Groth16 wrappers (which are intrinsically vulnerable to Shor's Algorithm). Production implementation requires Ethereum to support native post-quantum signatures or higher throughput Data Availability layers.
 2. **CCIP Latency**: Cross-chain finality via CCIP takes 15 to 30 minutes to achieve block confirmation on destination chains. This architecture is designed for high-value, slow institutional settlement scenarios rather than high-frequency execution.
