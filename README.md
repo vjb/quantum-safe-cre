@@ -49,7 +49,7 @@ graph LR
     class HomeVault,MockVerifier,CCIP_Router_Base,CCIP_Router_Arb,SpokeVault onchain;
 ```
 
-*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a massive, pure FRI STARK proof. To bypass the EVM block gas limits without destroying the quantum-safe properties via SNARK wrappers, the Relayer truncates the STARK into a Data Availability anchor and submits it to the Primary Hub on Base Sepolia. The Hub sequentially validates the anchor against a Verifier. Upon a successful logic test, the Hub dispatches the verified payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
+*Figure 1: The Omni-Chain Settlement Logical Flow. The user generates an ML-DSA signed intent, which is computed off-chain by an L4 GPU to generate a massive, pure FRI STARK proof. To bypass the EVM block gas limits without destroying the quantum-safe properties via SNARK wrappers, the Relayer truncates the STARK into a Data Availability anchor and submits it to the Primary Hub on Base Sepolia. The Hub sequentially validates the anchor against a **Mock Verifier**. A mocked logic test is intentionally utilized because wrapping the pure STARK proof in a standard Groth16 SNARK for EVM verification would reintroduce elliptic curve cryptography, which is vulnerable to Shor's Algorithm. Upon a successful simulated logic test, the Hub dispatches the verified payload to the Chainlink CCIP Router, which manages the Decentralized Oracle Network consensus to execute the final settlement on the Arbitrum Sepolia Replica Spoke.*
 
 ---
 
