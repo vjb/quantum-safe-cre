@@ -13,6 +13,7 @@ pub const ELF: &[u8] = include_bytes!(env!("SP1_PROGRAM_ELF"));
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
+    std::env::set_var("SP1_DUMP_DIR", "/app/trace_cache");
     info!("Starting SP1 Host Orchestrator...");
 
     let intent_path = Path::new("../../1-client/intent.json");
@@ -59,7 +60,8 @@ async fn main() {
     
     // Dump actual proof bytes and public values to hex strings for Chainlink Orchestrator
     debug!("Serializing Proof and Public Values to disk...");
-    let proof_hex = hex::encode(proof.bytes());
+    let proof_bytes = bincode::serialize(&proof).expect("Failed to serialize STARK proof");
+    let proof_hex = hex::encode(proof_bytes);
     // SP1 proof.public_values contains ABI encoded bounds. We'll extract raw bytes for Ethers format.
     let pv_hex = hex::encode(proof.public_values.as_slice());
     

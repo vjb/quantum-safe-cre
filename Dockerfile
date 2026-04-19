@@ -39,11 +39,11 @@ RUN rm build.rs
 # Supply ELF path statically for Rust compilation macro
 ENV SP1_PROGRAM_ELF="/app/elf/program"
 
-# Build release profile
-RUN cargo build --release
+# Build release profile with CUDA support
+RUN cargo build --release --features cuda
 
 # Phase 2: Lightweight Runtime Enclave
-FROM ubuntu:24.04
+FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04
 
 # Install base dynamic execution wrappers necessary for Cargo binaries interacting with Google Storage APIs
 RUN apt-get update && apt-get install -y curl pkg-config libssl3 ca-certificates curl gnupg && \
@@ -59,5 +59,6 @@ COPY --from=builder /app/2-sp1-coprocessor/target/release/script /usr/local/bin/
 
 ENV RUST_LOG="info"
 ENV SP1_PROGRAM_ELF="/app/elf/program"
+ENV SP1_PROVER="cuda"
 
 CMD ["zkvm-script"]

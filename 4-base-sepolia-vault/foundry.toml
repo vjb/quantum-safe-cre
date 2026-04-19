@@ -5,3 +5,9 @@ libs = ["lib"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 fs_permissions = [{ access = "read", path = ".." }]
+
+remappings = [
+    "@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip/",
+    "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+    "@openzeppelin/contracts@5.0.2/=node_modules/@openzeppelin/contracts/"
+]

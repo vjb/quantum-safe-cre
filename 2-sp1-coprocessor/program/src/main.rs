@@ -10,7 +10,8 @@ sol! {
     struct PqcIntent { 
         address target; 
         uint256 amount; 
-        uint256 nonce; 
+        uint256 nonce;
+        uint64 destinationChainSelector;
     } 
 }
 
@@ -45,9 +46,10 @@ pub fn main() {
     let nonce_val: u128 = nonce_str.parse().unwrap_or(42);
 
     let intent = PqcIntent {
-        target: "0x1234567890123456789012345678901234567890".parse().unwrap(),
+        target: "0xf85dF7CE67889266224171915e6149471cAfF927".parse().unwrap(),
         amount: U256::from(amount_val * 1_000_000), // Mapping 6-decimal integer arrays (USDC)
         nonce: U256::from(nonce_val),
+        destinationChainSelector: 3478487238524512106, // Arbitrum Sepolia CCIP
     };
 
     // 5. Output pure ABI-encoded EVM execution byte slice
